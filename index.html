@@ -3,46 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OpenClass | Secure Hub</title>
+    <title>OpenClass | Secure AI Hub</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <style>
-        body { background-color: #050505; color: white; font-family: sans-serif; }
-        .glass { background: rgba(20, 20, 20, 0.8); backdrop-filter: blur(10px); border: 1px solid #333; }
+        body { background-color: #050505; color: white; font-family: 'Inter', sans-serif; overflow-x: hidden; }
+        .glass { background: rgba(15, 15, 15, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
         .no-select { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+        .orange-glow { shadow-color: rgba(249, 115, 22, 0.4); box-shadow: 0 0 20px -5px rgba(249, 115, 22, 0.3); }
+        input::placeholder { color: #444; }
     </style>
 </head>
 <body class="no-select">
 
-    <div id="auth-screen" class="min-h-screen flex flex-col items-center justify-center p-6">
-        <h1 class="text-6xl font-black text-orange-500 mb-12 tracking-tighter">OpenClass</h1>
+    <!-- LOGIN SCREEN -->
+    <div id="auth-screen" class="min-h-screen flex flex-col items-center justify-center p-6 animate-in fade-in duration-700">
+        <div class="text-center mb-12">
+            <h1 class="text-7xl font-black text-orange-500 tracking-tighter mb-2">OpenClass</h1>
+            <p class="text-zinc-500 uppercase tracking-widest text-[10px] font-bold">Secure Education Ecosystem</p>
+        </div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-2xl">
-            <button onclick="startAuth('TEACHER')" class="p-10 border-2 border-orange-500/30 rounded-3xl hover:bg-orange-500 transition-all text-2xl font-bold uppercase">I am a Teacher</button>
-            <button onclick="startAuth('STUDENT')" class="p-10 border-2 border-blue-500/30 rounded-3xl hover:bg-blue-500 transition-all text-2xl font-bold uppercase">I am a Student</button>
+            <button onclick="startAuth('TEACHER')" class="group p-10 border-2 border-orange-500/20 rounded-[2.5rem] hover:bg-orange-500 hover:border-orange-500 transition-all duration-500 text-center">
+                <div class="text-orange-500 group-hover:text-white text-4xl mb-4 font-black">T</div>
+                <span class="text-2xl font-black uppercase tracking-tighter">I am a Teacher</span>
+            </button>
+            <button onclick="startAuth('STUDENT')" class="group p-10 border-2 border-blue-500/20 rounded-[2.5rem] hover:bg-blue-500 hover:border-blue-500 transition-all duration-500 text-center">
+                <div class="text-blue-500 group-hover:text-white text-4xl mb-4 font-black">S</div>
+                <span class="text-2xl font-black uppercase tracking-tighter">I am a Student</span>
+            </button>
         </div>
     </div>
 
-    <div id="app-screen" class="hidden min-h-screen">
-        <nav class="p-4 border-b border-zinc-800 flex justify-between items-center glass sticky top-0 z-50">
-            <h2 class="text-xl font-black text-orange-500">OPENCLASS</h2>
-            <button onclick="logout()" class="text-xs text-zinc-500 hover:text-red-500">LOGOUT</button>
+    <!-- MAIN APP SCREEN -->
+    <div id="app-screen" class="hidden min-h-screen flex flex-col">
+        <nav class="p-4 border-b border-zinc-900 flex justify-between items-center glass sticky top-0 z-50">
+            <h2 class="text-xl font-black text-orange-500 tracking-tighter">OPENCLASS</h2>
+            <div class="flex items-center gap-4">
+                <span id="user-display" class="text-[10px] font-mono text-zinc-500 bg-zinc-900 px-2 py-1 rounded uppercase"></span>
+                <button onclick="logout()" class="text-zinc-500 hover:text-red-500 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                </button>
+            </div>
         </nav>
 
-        <main id="main-content" class="p-6 max-w-4xl mx-auto space-y-8"></main>
+        <main id="main-content" class="p-6 max-w-4xl mx-auto w-full space-y-8 pb-20"></main>
     </div>
 
-    <!-- ANTI-DOWNLOAD PLAYER -->
-    <div id="video-modal" class="hidden fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-4">
-        <button onclick="closePlayer()" class="absolute top-6 right-6 text-white text-2xl">✕</button>
-        <div class="relative w-full max-w-5xl aspect-video rounded-2xl overflow-hidden shadow-2xl border border-zinc-800">
-            <div class="absolute inset-0 z-10 bg-transparent"></div> <!-- Blocking Overlay -->
-            <iframe id="player-frame" class="w-full h-full" allowfullscreen allow="autoplay"></iframe>
+    <!-- ANTI-DOWNLOAD PROTECTED PLAYER -->
+    <div id="video-modal" class="hidden fixed inset-0 z-[100] bg-black/98 flex flex-col items-center justify-center p-4">
+        <button onclick="closePlayer()" class="absolute top-6 right-6 text-zinc-500 hover:text-white text-3xl font-light">✕</button>
+        <div class="relative w-full max-w-5xl aspect-video rounded-3xl overflow-hidden shadow-2xl border border-zinc-800 bg-black">
+            <!-- Transparent Overlay to block right-clicks and interactions -->
+            <div class="absolute inset-0 z-10 bg-transparent" oncontextmenu="return false;"></div> 
+            <iframe id="player-frame" class="w-full h-full" allowfullscreen allow="autoplay; encrypted-media"></iframe>
         </div>
+        <p class="mt-4 text-zinc-600 text-xs italic tracking-widest uppercase">Protected Stream — Downloads Restricted</p>
     </div>
 
     <script>
+        // --- CONFIGURATION (STRICTLY DO NOT CHANGE THESE) ---
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby0xNAv1sNdo34kpPHkrlAceq8iZDOMXaoy9k_B9_hvTFtjR935CqCylGw1egqP8ppDdA/exec";
-        emailjs.init("P88qoYcr5CHYVNAPw");
+        const EMAILJS_PUBLIC = "P88qoYcr5CHYVNAPw";
+        const EMAILJS_SERVICE = "service_djr1n0f";
+        const EMAILJS_TEMPLATE = "template_bfbkopl";
+
+        emailjs.init(EMAILJS_PUBLIC);
 
         let currentEmail = localStorage.getItem('oc_email');
         let currentRole = localStorage.getItem('oc_role');
@@ -50,53 +75,63 @@
         if(currentEmail) showDashboard();
 
         async function startAuth(role) {
-            const email = prompt("Enter your email:");
-            if(!email) return;
+            const email = prompt("Enter your email for verification:");
+            if(!email || !email.includes('@')) return alert("Enter a valid email");
 
             const otp = Math.floor(100000 + Math.random() * 900000);
             
-            // Send real OTP via EmailJS
-            emailjs.send("service_djr1n0f", "template_tiqnb53", { to_email: email, otp: otp });
-            
-            const userOtp = prompt("Enter the 6-digit code sent to " + email);
-            if(userOtp == otp) {
-                localStorage.setItem('oc_email', email);
-                localStorage.setItem('oc_role', role);
-                currentEmail = email;
-                currentRole = role;
-                showDashboard();
-            } else {
-                alert("Invalid OTP");
-            }
+            // Sending OTP logic
+            emailjs.send(EMAILJS_SERVICE, EMAILJS_TEMPLATE, { to_email: email, otp: otp })
+            .then(() => {
+                const userOtp = prompt("OTP sent to " + email + ". Enter code:");
+                if(userOtp == otp) {
+                    localStorage.setItem('oc_email', email);
+                    localStorage.setItem('oc_role', role);
+                    currentEmail = email;
+                    currentRole = role;
+                    showDashboard();
+                } else {
+                    alert("Incorrect OTP code.");
+                }
+            })
+            .catch(err => alert("Email failed to send. Check configuration."));
         }
 
         function showDashboard() {
             document.getElementById('auth-screen').classList.add('hidden');
             document.getElementById('app-screen').classList.remove('hidden');
+            document.getElementById('user-display').innerText = currentEmail;
+            
             const main = document.getElementById('main-content');
             const teacherId = "OC-" + currentEmail.split('@')[0].toUpperCase();
 
             if(currentRole === 'TEACHER') {
                 main.innerHTML = `
-                    <div class="p-8 glass rounded-[2rem] border-orange-500/20">
-                        <h3 class="text-orange-500 font-bold uppercase text-xs">Public Campus ID</h3>
-                        <p class="text-4xl font-black">${teacherId}</p>
+                    <div class="p-10 glass rounded-[3rem] border-orange-500/20 orange-glow">
+                        <h3 class="text-orange-500 font-black uppercase text-[10px] tracking-[0.2em] mb-2">Campus Access ID</h3>
+                        <p class="text-5xl font-black tracking-tighter">${teacherId}</p>
                     </div>
-                    <div class="glass p-6 rounded-3xl space-y-4">
-                        <input id="title" placeholder="Lesson Title" class="w-full p-4 bg-black rounded-xl border border-zinc-800 outline-none focus:border-orange-500">
-                        <input id="url" placeholder="Paste Video/PDF Link" class="w-full p-4 bg-black rounded-xl border border-zinc-800 outline-none focus:border-orange-500">
-                        <button onclick="saveLink()" class="w-full py-4 bg-orange-600 rounded-xl font-bold uppercase tracking-widest hover:bg-orange-500 transition-all">Publish Lesson</button>
+                    <div class="glass p-8 rounded-[2.5rem] space-y-4">
+                        <h4 class="font-bold text-zinc-400 text-sm">Add New Resource</h4>
+                        <input id="title" placeholder="Lesson Title (e.g. Intro to IoT)" class="w-full p-4 bg-black rounded-2xl border border-zinc-800 outline-none focus:border-orange-500 transition-all">
+                        <input id="url" placeholder="Paste Video link (YouTube) or PDF URL" class="w-full p-4 bg-black rounded-2xl border border-zinc-800 outline-none focus:border-orange-500 transition-all">
+                        <button onclick="saveLink()" class="w-full py-4 bg-orange-600 rounded-2xl font-black uppercase tracking-widest hover:bg-orange-500 transition-all shadow-lg shadow-orange-900/20">Publish to Library</button>
                     </div>
-                    <div id="teacher-list" class="space-y-3"></div>
+                    <div class="space-y-4">
+                        <h4 class="font-bold text-zinc-500 text-xs uppercase tracking-widest">Your Live Lessons</h4>
+                        <div id="teacher-list" class="grid gap-3"></div>
+                    </div>
                 `;
-                loadTeacherContent(teacherId);
+                fetchContent(teacherId, 'teacher-list');
             } else {
                 main.innerHTML = `
-                    <div class="flex gap-2">
-                        <input id="search-id" placeholder="Enter Teacher ID (OC-NAME)" class="flex-grow p-4 bg-zinc-900 rounded-2xl border border-zinc-800 outline-none">
-                        <button onclick="searchTeacher()" class="bg-blue-600 px-8 rounded-2xl font-bold">FIND</button>
+                    <div class="flex gap-3">
+                        <div class="relative flex-grow">
+                            <input id="search-id" placeholder="Enter Teacher ID (e.g. OC-KUNAL)" class="w-full p-5 bg-zinc-900 rounded-[1.5rem] border border-zinc-800 outline-none focus:border-blue-500 transition-all">
+                        </div>
+                        <button onclick="searchTeacher()" class="bg-blue-600 px-10 rounded-[1.5rem] font-black uppercase tracking-widest hover:bg-blue-500 transition-all">Find</button>
                     </div>
-                    <div id="student-list" class="grid gap-4 mt-8"></div>
+                    <div id="student-list" class="grid gap-4 mt-12"></div>
                 `;
             }
         }
@@ -104,37 +139,63 @@
         async function saveLink() {
             const title = document.getElementById('title').value;
             const url = document.getElementById('url').value;
+            if(!title || !url) return alert("Please fill all fields");
+            
             const teacherId = "OC-" + currentEmail.split('@')[0].toUpperCase();
             
-            await fetch(SCRIPT_URL, {
+            // Send to Google Sheets
+            fetch(SCRIPT_URL, {
                 method: 'POST',
                 mode: 'no-cors',
                 body: JSON.stringify({
                     type: "content",
                     action: "save",
-                    row: [teacherId, title, url, url.includes('.pdf') ? 'PDF' : 'VIDEO']
+                    row: [teacherId, title, url, url.toLowerCase().includes('.pdf') ? 'PDF' : 'VIDEO']
                 })
+            }).then(() => {
+                alert("Published Successfully!");
+                location.reload();
             });
-            alert("Published!");
-            location.reload();
         }
 
-        async function searchTeacher() {
-            const id = document.getElementById('search-id').value.toUpperCase();
+        async function fetchContent(id, containerId) {
             const res = await fetch(SCRIPT_URL + "?teacherId=" + id);
             const data = await res.json();
-            const list = document.getElementById('student-list');
+            const list = document.getElementById(containerId);
+            
+            if(data.length === 0) {
+                list.innerHTML = `<p class="text-zinc-600 italic text-sm p-4">No lessons found yet.</p>`;
+                return;
+            }
+
             list.innerHTML = data.map(item => `
-                <div class="glass p-5 rounded-2xl flex justify-between items-center">
-                    <div><p class="font-bold">${item[1]}</p><p class="text-xs text-zinc-500">${item[3]}</p></div>
-                    <button onclick="openContent('${item[2]}', '${item[3]}')" class="bg-white text-black px-4 py-2 rounded-lg font-bold text-xs uppercase">Open</button>
+                <div class="glass p-5 rounded-2xl flex justify-between items-center group hover:border-zinc-500 transition-all">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-full bg-zinc-900 flex items-center justify-center text-zinc-500">
+                            ${item[3] === 'VIDEO' ? '▶' : '📄'}
+                        </div>
+                        <div>
+                            <p class="font-bold text-sm">${item[1]}</p>
+                            <p class="text-[10px] text-zinc-600 uppercase font-bold">${item[3]}</p>
+                        </div>
+                    </div>
+                    <button onclick="openContent('${item[2]}', '${item[3]}')" class="bg-white text-black px-5 py-2 rounded-xl font-black text-[10px] uppercase tracking-tighter hover:scale-105 transition-transform">Access</button>
                 </div>
             `).join('');
         }
 
+        async function searchTeacher() {
+            const id = document.getElementById('search-id').value.toUpperCase().trim();
+            if(!id) return;
+            fetchContent(id, 'student-list');
+        }
+
         function openContent(url, type) {
             if(type === 'VIDEO') {
-                let embedUrl = url.replace("watch?v=", "embed/");
+                let embedUrl = url;
+                if(url.includes("watch?v=")) embedUrl = url.replace("watch?v=", "embed/");
+                if(url.includes("youtu.be/")) embedUrl = url.replace("youtu.be/", "youtube.com/embed/");
+                
                 document.getElementById('player-frame').src = embedUrl;
                 document.getElementById('video-modal').classList.remove('hidden');
             } else {
