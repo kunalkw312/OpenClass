@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenClass | Secure Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <style>
+        body { background-color: #050505; color: white; font-family: sans-serif; }
+        .glass { background: rgba(20, 20, 20, 0.8); backdrop-filter: blur(10px); border: 1px solid #333; }
+        .no-select { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+    </style>
+</head>
+<body class="no-select">
+
+    <div id="auth-screen" class="min-h-screen flex flex-col items-center justify-center p-6">
+        <h1 class="text-6xl font-black text-orange-500 mb-12 tracking-tighter">OpenClass</h1>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-2xl">
+            <button onclick="startAuth('TEACHER')" class="p-10 border-2 border-orange-500/30 rounded-3xl hover:bg-orange-500 transition-all text-2xl font-bold uppercase">I am a Teacher</button>
+            <button onclick="startAuth('STUDENT')" class="p-10 border-2 border-blue-500/30 rounded-3xl hover:bg-blue-500 transition-all text-2xl font-bold uppercase">I am a Student</button>
+        </div>
+    </div>
+
+    <div id="app-screen" class="hidden min-h-screen">
+        <nav class="p-4 border-b border-zinc-800 flex justify-between items-center glass sticky top-0 z-50">
+            <h2 class="text-xl font-black text-orange-500">OPENCLASS</h2>
+            <button onclick="logout()" class="text-xs text-zinc-500 hover:text-red-500">LOGOUT</button>
+        </nav>
+
+        <main id="main-content" class="p-6 max-w-4xl mx-auto space-y-8"></main>
+    </div>
+
+    <!-- ANTI-DOWNLOAD PLAYER -->
+    <div id="video-modal" class="hidden fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-4">
+        <button onclick="closePlayer()" class="absolute top-6 right-6 text-white text-2xl">✕</button>
+        <div class="relative w-full max-w-5xl aspect-video rounded-2xl overflow-hidden shadow-2xl border border-zinc-800">
+            <div class="absolute inset-0 z-10 bg-transparent"></div> <!-- Blocking Overlay -->
+            <iframe id="player-frame" class="w-full h-full" allowfullscreen allow="autoplay"></iframe>
+        </div>
+    </div>
+
+    <script>
+        const SCRIPT_URL = "YOUR_GOOGLE_SCRIPT_WEB_APP_URL";
+        emailjs.init("YOUR_EMAILJS_PUBLIC_KEY");
+
+        let currentEmail = localStorage.getItem('oc_email');
+        let currentRole = localStorage.getItem('oc_role');
+
+        if(currentEmail) showDashboard();
+
+        async function startAuth(role) {
+            const email = prompt("Enter your email:");
+            if(!email) return;
+
+            const otp = Math.floor(100000 + Math.random() * 900000);
+            
+            // Send real OTP via EmailJS
+            emailjs.send("service_id", "template_id", { to_email: email, otp: otp });
+            
+            const userOtp = prompt("Enter the 6-digit code sent to " + email);
+            if(userOtp == otp) {
+                localStorage.setItem('oc_email', email);
+                localStorage.setItem('oc_role', role);
+                currentEmail = email;
+                currentRole = role;
+                showDashboard();
+            } else {
+                alert("Invalid OTP");
+            }
+        }
+
+        function showDashboard() {
+            document.getElementById('auth-screen').classList.add('hidden');
+            document.getElementById('app-screen').classList.remove('hidden');
+            const main = document.getElementById('main-content');
+            const teacherId = "OC-" + currentEmail.split('@')[0].toUpperCase();
+
+            if(currentRole === 'TEACHER') {
+                main.innerHTML = `
+                    <div class="p-8 glass rounded-[2rem] border-orange-500/20">
+                        <h3 class="text-orange-500 font-bold uppercase text-xs">Public Campus ID</h3>
+                        <p class="text-4xl font-black">${teacherId}</p>
+                    </div>
+                    <div class="glass p-6 rounded-3xl space-y-4">
+                        <input id="title" placeholder="Lesson Title" class="w-full p-4 bg-black rounded-xl border border-zinc-800 outline-none focus:border-orange-500">
+                        <input id="url" placeholder="Paste Video/PDF Link" class="w-full p-4 bg-black rounded-xl border border-zinc-800 outline-none focus:border-orange-500">
+                        <button onclick="saveLink()" class="w-full py-4 bg-orange-600 rounded-xl font-bold uppercase tracking-widest hover:bg-orange-500 transition-all">Publish Lesson</button>
+                    </div>
+                    <div id="teacher-list" class="space-y-3"></div>
+                `;
+                loadTeacherContent(teacherId);
+            } else {
+                main.innerHTML = `
+                    <div class="flex gap-2">
+                        <input id="search-id" placeholder="Enter Teacher ID (OC-NAME)" class="flex-grow p-4 bg-zinc-900 rounded-2xl border border-zinc-800 outline-none">
+                        <button onclick="searchTeacher()" class="bg-blue-600 px-8 rounded-2xl font-bold">FIND</button>
+                    </div>
+                    <div id="student-list" class="grid gap-4 mt-8"></div>
+                `;
+            }
+        }
+
+        async function saveLink() {
+            const title = document.getElementById('title').value;
+            const url = document.getElementById('url').value;
+            const teacherId = "OC-" + currentEmail.split('@')[0].toUpperCase();
+            
+            await fetch(SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                body: JSON.stringify({
+                    type: "content",
+                    action: "save",
+                    row: [teacherId, title, url, url.includes('.pdf') ? 'PDF' : 'VIDEO']
+                })
+            });
+            alert("Published!");
+            location.reload();
+        }
+
+        async function searchTeacher() {
+            const id = document.getElementById('search-id').value.toUpperCase();
+            const res = await fetch(SCRIPT_URL + "?teacherId=" + id);
+            const data = await res.json();
+            const list = document.getElementById('student-list');
+            list.innerHTML = data.map(item => `
+                <div class="glass p-5 rounded-2xl flex justify-between items-center">
+                    <div><p class="font-bold">${item[1]}</p><p class="text-xs text-zinc-500">${item[3]}</p></div>
+                    <button onclick="openContent('${item[2]}', '${item[3]}')" class="bg-white text-black px-4 py-2 rounded-lg font-bold text-xs uppercase">Open</button>
+                </div>
+            `).join('');
+        }
+
+        function openContent(url, type) {
+            if(type === 'VIDEO') {
+                let embedUrl = url.replace("watch?v=", "embed/");
+                document.getElementById('player-frame').src = embedUrl;
+                document.getElementById('video-modal').classList.remove('hidden');
+            } else {
+                window.open(url, '_blank');
+            }
+        }
+
+        function closePlayer() {
+            document.getElementById('video-modal').classList.add('hidden');
+            document.getElementById('player-frame').src = "";
+        }
+
+        function logout() { localStorage.clear(); location.reload(); }
+    </script>
+</body>
+</html>
