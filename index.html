@@ -56,7 +56,7 @@
             const otp = Math.floor(100000 + Math.random() * 900000);
             
             // Send real OTP via EmailJS
-            emailjs.send("service_djr1n0f", "template_kjk38mi", { to_email: email, otp: otp });
+            emailjs.send("service_djr1n0f", "template_tiqnb53", { to_email: email, otp: otp });
             
             const userOtp = prompt("Enter the 6-digit code sent to " + email);
             if(userOtp == otp) {
