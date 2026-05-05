@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OpenClass | Secure Pro LMS</title>
+    <title>OpenClass | Professional Secure LMS</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
@@ -12,38 +12,47 @@
         .glass { background: rgba(15, 15, 15, 0.8); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.05); }
         .btn-orange { background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); transition: 0.3s; }
         .input-field { background: #111; border: 1px solid #222; padding: 1rem; border-radius: 12px; width: 100%; outline: none; color: white; }
-        #global-loader { fixed inset-0 z-[300] bg-black/95 flex flex-col items-center justify-center transition-all duration-500; }
+        #global-loader { fixed inset-0 z-[300] bg-black flex flex-col items-center justify-center transition-all duration-500; }
         .spinner { width: 40px; height: 40px; border: 3px solid #111; border-top: 3px solid #f97316; border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
-    <div id="toast-box" class="fixed top-6 right-6 z-[400] flex flex-col gap-3"></div>
+    <div id="toast-box" class="fixed top-6 right-6 z-[450] flex flex-col gap-3"></div>
 
     <div id="global-loader" class="hidden fixed inset-0 z-[300] bg-black flex flex-col items-center justify-center">
         <div class="spinner"></div>
-        <p class="mt-4 text-[10px] font-bold uppercase tracking-widest text-zinc-500">Processing Campus Request...</p>
+        <p class="mt-4 text-[10px] font-bold uppercase tracking-widest text-zinc-500">Communicating with Campus...</p>
     </div>
 
     <!-- Media Vault -->
     <div id="media-vault" class="hidden fixed inset-0 z-[250] bg-black/98 flex flex-col">
         <nav class="p-4 glass border-b border-white/5 flex justify-between items-center px-10">
-            <h3 id="vault-title" class="font-black text-orange-500 text-sm italic">OPENCLASS SECURE PREVIEW</h3>
-            <button onclick="closeVault()" class="bg-zinc-900 px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:text-red-500 transition-colors">Close (ESC)</button>
+            <h3 id="vault-title" class="font-black text-orange-500 text-sm tracking-tighter uppercase italic">Secure Vault</h3>
+            <button onclick="closeVault()" class="bg-zinc-900 px-5 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:text-red-500 transition-all">Close (ESC)</button>
         </nav>
         <div class="flex-grow flex items-center justify-center p-4">
             <iframe id="vault-frame" class="w-full h-full max-w-6xl rounded-2xl shadow-2xl border border-white/5" allowfullscreen></iframe>
         </div>
     </div>
 
+    <!-- Management Modal (Edit/Delete) -->
+    <div id="mgr-modal" class="hidden fixed inset-0 z-[350] bg-black/90 backdrop-blur-md flex items-center justify-center p-6">
+        <div class="w-full max-w-md glass p-10 rounded-[3rem] border border-white/10">
+            <h3 id="mgr-title" class="text-2xl font-black mb-4 tracking-tighter">Edit Resource</h3>
+            <div id="mgr-body" class="space-y-4 mb-8"></div>
+            <div class="flex gap-3" id="mgr-footer"></div>
+        </div>
+    </div>
+
     <!-- OTP Modal -->
     <div id="otp-modal" class="hidden fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-6">
-        <div class="w-full max-w-sm glass p-10 rounded-[3rem] relative text-center border border-white/5">
+        <div class="w-full max-w-sm glass p-10 rounded-[3rem] relative text-center">
             <button onclick="closeOtp()" class="absolute top-8 right-8 text-zinc-500 hover:text-white transition-colors">✕</button>
-            <h3 class="text-2xl font-black mb-2">Verify Identity</h3>
-            <p id="otp-note" class="text-zinc-500 text-[9px] mb-8 uppercase tracking-[0.2em] font-bold"></p>
-            <input type="number" id="otp-input" class="input-field text-center text-4xl font-black mb-8 tracking-tighter" placeholder="000000">
+            <h3 class="text-2xl font-black mb-2">Verify OTP</h3>
+            <p id="otp-note" class="text-zinc-500 text-[9px] mb-8 uppercase tracking-widest font-bold"></p>
+            <input type="number" id="otp-input" class="input-field text-center text-4xl font-black mb-8" placeholder="000000">
             <button onclick="verifyOtp()" class="w-full py-4 btn-orange rounded-2xl font-bold uppercase tracking-widest">Verify</button>
         </div>
     </div>
@@ -61,10 +70,10 @@
                     </select>
                 </div>
                 <div class="space-y-4">
-                    <input type="email" id="auth-email" placeholder="Campus Email" class="input-field">
-                    <input type="password" id="auth-pass" placeholder="Security Password" class="input-field">
+                    <input type="email" id="auth-email" placeholder="Email" class="input-field">
+                    <input type="password" id="auth-pass" placeholder="Password" class="input-field">
                     <button onclick="handleAuth()" id="primary-btn" class="w-full py-4 btn-orange rounded-2xl font-black uppercase tracking-widest">Sign In</button>
-                    <button onclick="toggleMode()" class="w-full text-[10px] text-zinc-600 font-bold uppercase tracking-widest mt-4 hover:text-zinc-400 transition-colors">Create Campus Account</button>
+                    <button onclick="toggleMode()" class="w-full text-[10px] text-zinc-600 font-bold uppercase tracking-widest mt-4">Switch to Registration</button>
                 </div>
             </div>
         </div>
@@ -75,9 +84,9 @@
                 <h2 class="text-2xl font-black text-orange-500 tracking-tighter cursor-pointer italic" onclick="loadHome()">OpenClass</h2>
                 <div class="relative">
                     <input type="text" id="g-search" onkeyup="handleSearch(event)" placeholder="Search Teacher or ID..." class="bg-zinc-900 border border-white/5 rounded-2xl px-6 py-2 text-sm w-80 outline-none focus:border-orange-500 transition-all focus:w-96">
-                    <div id="search-results" class="hidden absolute top-full left-0 right-0 mt-4 glass p-4 rounded-[2rem] border border-orange-500/20 max-h-[500px] overflow-y-auto shadow-2xl"></div>
+                    <div id="search-results" class="hidden absolute top-full left-0 right-0 mt-4 glass p-4 rounded-[2rem] border border-orange-500/20 max-h-[500px] overflow-y-auto"></div>
                 </div>
-                <button onclick="logout()" class="text-[10px] font-black text-zinc-600 hover:text-red-500 uppercase tracking-widest transition-colors">Logout</button>
+                <button onclick="logout()" class="text-[10px] font-black text-zinc-600 hover:text-red-500 uppercase">Logout</button>
             </nav>
             <main id="main-content" class="p-10 max-w-7xl mx-auto w-full"></main>
         </div>
@@ -85,7 +94,7 @@
 
     <script>
         const CONFIG = {
-            URL: "https://script.google.com/macros/s/AKfycbw54HE6U4MXm6Y9uO6JPnDT18afn6vNABeSyBYGE5ZZ7RJc9EBlxlzcVNDU7VkFMlLKHg/exec",
+            URL: "https://script.google.com/macros/s/AKfycbwAZapMSo4Ng9YM1vYLbazwTs1WbwwYu19WbtroTCmojDgZSqc4E54US7flJwx6cSV4/exec",
             EMAIL_SVC: "service_djr1n0f",
             EMAIL_TMP: "template_tiqnb53",
             EMAIL_PUB: "P88qoYcr5CHYVNAPw"
@@ -95,22 +104,22 @@
         let user = JSON.parse(localStorage.getItem('oc_user'));
         let isSignup = false, genOtp, pending;
 
-        // UI Core
+        // UI Helpers
         function toast(msg, type="success") {
             const b = document.getElementById('toast-box');
             const d = document.createElement('div');
-            d.className = `glass px-6 py-4 rounded-2xl border-l-4 ${type==='success'?'border-orange-500':'border-red-500'} text-[10px] font-black uppercase tracking-widest shadow-2xl animate-bounce`;
-            d.innerText = msg;
-            b.appendChild(d);
+            d.className = `glass px-6 py-4 rounded-2xl border-l-4 ${type==='success'?'border-orange-500':'border-red-500'} text-[10px] font-black uppercase tracking-widest shadow-2xl`;
+            d.innerText = msg; b.appendChild(d);
             setTimeout(() => d.remove(), 4000);
         }
 
         function toggleLoader(s) { document.getElementById('global-loader').classList[s?'remove':'add']('hidden'); }
         function closeOtp() { document.getElementById('otp-modal').classList.add('hidden'); genOtp = null; }
         function closeVault() { document.getElementById('media-vault').classList.add('hidden'); document.getElementById('vault-frame').src=""; }
+        function closeMgr() { document.getElementById('mgr-modal').classList.add('hidden'); }
 
         window.addEventListener('keydown', e => {
-            if(e.key === 'Escape') { closeVault(); closeOtp(); }
+            if(e.key === 'Escape') { closeVault(); closeOtp(); closeMgr(); }
         });
 
         if(user) renderDashboard();
@@ -127,7 +136,7 @@
             if(isSignup) {
                 genOtp = Math.floor(100000 + Math.random() * 900000);
                 pending = { email, password: pass, name: document.getElementById('reg-name').value, role: document.getElementById('reg-role').value };
-                document.getElementById('otp-note').innerText = `Code sent to ${email}`;
+                document.getElementById('otp-note').innerText = `Sent to ${email}`;
                 await emailjs.send(CONFIG.EMAIL_SVC, CONFIG.EMAIL_TMP, { to_email: email, otp: genOtp });
                 document.getElementById('otp-modal').classList.remove('hidden');
             } else {
@@ -143,9 +152,9 @@
             if(document.getElementById('otp-input').value == genOtp) {
                 toggleLoader(true);
                 await api("signup", pending);
-                toast("Campus Access Granted!");
+                toast("Account Verified!");
                 location.reload();
-            } else toast("Wrong OTP Code", "error");
+            } else toast("Wrong Code", "error");
         }
 
         function renderDashboard() {
@@ -162,11 +171,11 @@
                     <div class="grid lg:grid-cols-3 gap-10">
                         <div class="glass p-8 rounded-[3rem] h-fit sticky top-28 border border-white/5">
                             <h3 class="text-orange-500 font-black text-[10px] uppercase mb-6 tracking-widest">Publish New Resource</h3>
-                            <input id="up-title" placeholder="Topic Title" class="input-field mb-3">
-                            <input id="up-url" placeholder="Resource URL (YouTube/PDF)" class="input-field mb-3">
-                            <select id="up-type" class="input-field mb-6"><option value="VIDEO">Video Lesson</option><option value="FILE">Static File</option></select>
-                            <button onclick="publish()" class="w-full py-4 btn-orange rounded-2xl font-bold text-xs uppercase tracking-widest">Post Live</button>
-                            <div class="mt-8 pt-6 border-t border-white/5"><p class="text-[9px] text-zinc-500 uppercase font-black">Campus ID: ${user.teacherId}</p></div>
+                            <input id="up-title" placeholder="Title" class="input-field mb-3">
+                            <input id="up-url" placeholder="URL" class="input-field mb-3">
+                            <select id="up-type" class="input-field mb-6"><option value="VIDEO">Video</option><option value="FILE">File</option></select>
+                            <button onclick="publish()" class="w-full py-4 btn-orange rounded-xl font-bold text-xs uppercase tracking-widest">Post Live</button>
+                            <div class="mt-8 pt-6 border-t border-white/5 text-[9px] text-zinc-500 uppercase font-black">ID: ${user.teacherId}</div>
                         </div>
                         <div id="feed" class="lg:col-span-2 space-y-6"></div>
                     </div>`;
@@ -185,10 +194,10 @@
             const resDiv = document.getElementById('search-results');
             if(q.length < 2) return resDiv.classList.add('hidden');
             resDiv.classList.remove('hidden');
-            resDiv.innerHTML = `<p class="p-4 text-center text-[10px] font-black text-zinc-700 animate-pulse uppercase">Scanning Campus Network...</p>`;
+            resDiv.innerHTML = `<p class="p-4 text-center text-[10px] font-black text-zinc-700 animate-pulse uppercase">Scanning Campus...</p>`;
             const data = await api("search", { email: user.email }, q);
             resDiv.innerHTML = data.map(t => `
-                <div class="p-4 hover:bg-white/5 rounded-2xl flex justify-between items-center cursor-pointer group" onclick="viewTeacherProfile('${t.id}')">
+                <div class="p-4 hover:bg-white/5 rounded-2xl flex justify-between items-center group cursor-pointer" onclick="viewTeacherProfile('${t.id}')">
                     <div class="flex-grow">
                         <div class="flex items-center gap-2">
                             <p class="font-bold text-sm">${t.name}</p>
@@ -196,13 +205,13 @@
                         </div>
                         <p class="text-[9px] text-zinc-500 uppercase font-bold tracking-widest">${t.postCount} Posts • ${t.subCount} Subs</p>
                     </div>
-                    <button onclick="event.stopPropagation(); toggleSub(this, '${t.id}', ${t.isSubscribed})" class="ml-4 px-4 py-2 ${t.isSubscribed?'bg-zinc-800 text-zinc-600':'btn-orange'} rounded-xl text-[9px] font-black uppercase transition-all">
+                    <button onclick="event.stopPropagation(); toggleSubscription(this, '${t.id}', ${t.isSubscribed})" class="ml-4 px-4 py-2 ${t.isSubscribed?'bg-zinc-800 text-zinc-600':'btn-orange'} rounded-xl text-[9px] font-black uppercase transition-all">
                         ${t.isSubscribed?'Unsubscribe':'Subscribe'}
                     </button>
                 </div>`).join('');
         }
 
-        async function toggleSub(btn, tId, isSubbed) {
+        async function toggleSubscription(btn, tId, isSubbed) {
             btn.disabled = true;
             const action = isSubbed ? "unsubscribe" : "subscribe";
             await api(action, { studentEmail: user.email, teacherId: tId });
@@ -220,23 +229,16 @@
                 <div class="max-w-4xl mx-auto">
                     <button onclick="loadHome()" class="mb-8 text-zinc-500 text-[10px] font-black uppercase tracking-widest hover:text-white transition-colors">← Back to Feed</button>
                     <div class="glass p-10 rounded-[3rem] border border-orange-500/10 mb-10 flex justify-between items-center">
-                        <div>
-                            <span class="text-[9px] text-orange-500 font-black uppercase tracking-widest">Verified Instructor</span>
-                            <h2 class="text-4xl font-black italic tracking-tighter mt-1">${t.name}</h2>
-                            <p class="text-zinc-500 font-bold text-sm">${t.institute}</p>
-                        </div>
+                        <div><h2 class="text-4xl font-black italic tracking-tighter">${t.name}</h2><p class="text-zinc-500 text-sm font-bold uppercase">${t.institute}</p></div>
                         <div class="flex gap-10">
-                            <div class="text-center"><p class="text-[9px] text-zinc-600 font-bold uppercase">Resources</p><p class="text-3xl font-black">${t.postCount}</p></div>
-                            <div class="text-center"><p class="text-[9px] text-zinc-600 font-bold uppercase">Followers</p><p class="text-3xl font-black">${t.subCount}</p></div>
+                            <div class="text-center"><p class="text-[9px] text-zinc-600 uppercase">Posts</p><p class="text-3xl font-black">${t.postCount}</p></div>
+                            <div class="text-center"><p class="text-[9px] text-zinc-600 uppercase">Subs</p><p class="text-3xl font-black">${t.subCount}</p></div>
                         </div>
                     </div>
                     <div class="space-y-4">${t.posts.map(p => `
-                        <div class="glass p-6 rounded-[2rem] flex justify-between items-center group border border-transparent hover:border-white/5 transition-all">
-                            <div class="flex items-center gap-4">
-                                <div class="w-10 h-10 bg-zinc-900 rounded-2xl flex items-center justify-center">${p.type==='VIDEO'?'🎬':'📄'}</div>
-                                <p class="font-bold text-sm text-zinc-200">${p.title}</p>
-                            </div>
-                            <button onclick="openResource('${p.id}','${p.url}','${p.type}','${p.title}')" class="bg-white text-black px-6 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:scale-105 transition-all">Access</button>
+                        <div class="glass p-6 rounded-[2rem] flex justify-between items-center">
+                            <p class="font-bold text-sm">${p.title}</p>
+                            <button onclick="openResource('${p.id}','${p.url}','${p.type}','${p.title}')" class="bg-white text-black px-6 py-2 rounded-xl text-[9px] font-bold uppercase">Open</button>
                         </div>`).join('')}</div>
                 </div>`;
             document.getElementById('search-results').classList.add('hidden');
@@ -245,24 +247,54 @@
 
         async function publish() {
             const p = { teacherId: user.teacherId, teacherName: user.name, title: document.getElementById('up-title').value, url: document.getElementById('up-url').value, type: document.getElementById('up-type').value };
-            toggleLoader(true); await api("upload", p); toast("Published Live!"); loadHome();
+            toggleLoader(true); await api("upload", p); toast("Published!"); loadHome();
         }
 
         function renderFeed(data, isT) {
             const f = document.getElementById('feed');
-            if(!data || !data.length) { f.innerHTML = `<p class="text-center py-20 text-zinc-800 uppercase text-[9px] font-black tracking-[0.6em]">No campus activity found</p>`; return; }
+            if(!data || !data.length) { f.innerHTML = `<p class="text-center py-20 text-zinc-800 uppercase text-[9px] font-black tracking-widest">No activity</p>`; return; }
             f.innerHTML = data.map(i => `
-                <div class="glass p-8 rounded-[2.5rem] flex justify-between items-center border border-transparent hover:border-orange-500/20 transition-all group">
+                <div class="glass p-8 rounded-[2.5rem] flex justify-between items-center group border border-transparent hover:border-orange-500/10 transition-all">
                     <div class="flex items-center gap-6">
-                        <div class="w-14 h-14 bg-zinc-900 rounded-3xl flex items-center justify-center group-hover:bg-zinc-800 transition-all">${i.type==='VIDEO'?'🎬':'📄'}</div>
+                        <div class="w-14 h-14 bg-zinc-900 rounded-3xl flex items-center justify-center">${i.type==='VIDEO'?'🎬':'📄'}</div>
                         <div>
                             <p class="text-[9px] text-orange-500 font-black uppercase tracking-widest">${i.type}</p>
                             <h4 class="font-black text-xl text-zinc-200 tracking-tight">${i.title}</h4>
-                            <p class="text-[9px] text-zinc-600 font-bold uppercase tracking-widest">${i.views||0} Secure Views</p>
+                            <p class="text-[9px] text-zinc-600 font-bold uppercase">${i.views||0} Views</p>
                         </div>
                     </div>
-                    <button onclick="openResource('${i.id}','${i.url}','${i.type}','${i.title}')" class="bg-white text-black px-8 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-orange-500 hover:text-white transition-all">Open</button>
+                    <div class="flex gap-2">
+                        <button onclick="openResource('${i.id}','${i.url}','${i.type}','${i.title}')" class="bg-white text-black px-8 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all">Open</button>
+                        ${isT ? `
+                            <button onclick="openEdit('${i.id}','${i.title}','${i.url}')" class="p-3 bg-zinc-900 rounded-xl hover:text-orange-500 transition-all">✎</button>
+                            <button onclick="openDel('${i.id}')" class="p-3 bg-zinc-900 rounded-xl hover:text-red-500 transition-all">🗑</button>
+                        ` : ''}
+                    </div>
                 </div>`).join('');
+        }
+
+        function openEdit(id, t, u) {
+            document.getElementById('mgr-title').innerText = "Edit Resource";
+            document.getElementById('mgr-body').innerHTML = `<input id="e-t" value="${t}" class="input-field"><input id="e-u" value="${u}" class="input-field">`;
+            document.getElementById('mgr-footer').innerHTML = `<button onclick="closeMgr()" class="flex-1 py-4 bg-zinc-900 rounded-xl">Cancel</button><button onclick="saveEdit('${id}')" class="flex-1 py-4 btn-orange rounded-xl uppercase font-black text-[10px]">Save</button>`;
+            document.getElementById('mgr-modal').classList.remove('hidden');
+        }
+
+        async function saveEdit(id) {
+            const title = document.getElementById('e-t').value;
+            const url = document.getElementById('e-u').value;
+            closeMgr(); toggleLoader(true); await api("edit_content", { id, title, url }); toast("Updated!"); loadHome();
+        }
+
+        function openDel(id) {
+            document.getElementById('mgr-title').innerText = "Delete Resource";
+            document.getElementById('mgr-body').innerHTML = `<p class="text-zinc-500 text-sm">Remove this item permanently?</p>`;
+            document.getElementById('mgr-footer').innerHTML = `<button onclick="closeMgr()" class="flex-1 py-4 bg-zinc-900 rounded-xl">Cancel</button><button onclick="confirmDel('${id}')" class="flex-1 py-4 bg-red-600 rounded-xl uppercase font-black text-[10px]">Delete</button>`;
+            document.getElementById('mgr-modal').classList.remove('hidden');
+        }
+
+        async function confirmDel(id) {
+            closeMgr(); toggleLoader(true); await api("delete_content", { id }); toast("Deleted!", "error"); loadHome();
         }
 
         function openResource(id, url, type, title) {
