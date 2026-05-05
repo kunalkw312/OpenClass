@@ -3,49 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OpenClass | Secure Multi-Tenant LMS</title>
+    <title>OpenClass | Secure Pro LMS</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         body { background: #050505; color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; }
-        .glass { background: rgba(18, 18, 18, 0.7); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.05); }
+        .glass { background: rgba(15, 15, 15, 0.8); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.05); }
         .btn-orange { background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); transition: 0.3s; }
         .input-field { background: #111; border: 1px solid #222; padding: 1rem; border-radius: 12px; width: 100%; outline: none; color: white; }
-        .input-field:focus { border-color: #f97316; }
-        #global-loader { fixed inset-0 z-[300] bg-black/90 flex flex-col items-center justify-center transition-all duration-500; }
+        #global-loader { fixed inset-0 z-[300] bg-black/95 flex flex-col items-center justify-center transition-all duration-500; }
         .spinner { width: 40px; height: 40px; border: 3px solid #111; border-top: 3px solid #f97316; border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .shortcut { font-size: 9px; color: #444; background: #111; padding: 2px 5px; border-radius: 4px; margin-left: 5px; }
     </style>
 </head>
 <body>
 
-    <!-- Toast Container -->
     <div id="toast-box" class="fixed top-6 right-6 z-[400] flex flex-col gap-3"></div>
 
-    <!-- Global Loader -->
     <div id="global-loader" class="hidden fixed inset-0 z-[300] bg-black flex flex-col items-center justify-center">
         <div class="spinner"></div>
-        <p class="mt-4 text-[10px] font-bold uppercase tracking-widest text-zinc-500">Syncing Campus Data...</p>
+        <p class="mt-4 text-[10px] font-bold uppercase tracking-widest text-zinc-500">Processing Campus Request...</p>
     </div>
 
-    <!-- Media Vault (In-Site Player) -->
+    <!-- Media Vault -->
     <div id="media-vault" class="hidden fixed inset-0 z-[250] bg-black/98 flex flex-col">
-        <nav class="p-4 glass border-b border-white/5 flex justify-between items-center">
-            <h3 id="vault-title" class="font-black text-orange-500 text-sm">SECURE VIEW</h3>
-            <button onclick="closeVault()" class="bg-zinc-900 px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:text-red-500">Close (ESC)</button>
+        <nav class="p-4 glass border-b border-white/5 flex justify-between items-center px-10">
+            <h3 id="vault-title" class="font-black text-orange-500 text-sm italic">OPENCLASS SECURE PREVIEW</h3>
+            <button onclick="closeVault()" class="bg-zinc-900 px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:text-red-500 transition-colors">Close (ESC)</button>
         </nav>
         <div class="flex-grow flex items-center justify-center p-4">
             <iframe id="vault-frame" class="w-full h-full max-w-6xl rounded-2xl shadow-2xl border border-white/5" allowfullscreen></iframe>
         </div>
     </div>
 
-    <!-- App Container -->
+    <!-- OTP Modal -->
+    <div id="otp-modal" class="hidden fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-6">
+        <div class="w-full max-w-sm glass p-10 rounded-[3rem] relative text-center border border-white/5">
+            <button onclick="closeOtp()" class="absolute top-8 right-8 text-zinc-500 hover:text-white transition-colors">✕</button>
+            <h3 class="text-2xl font-black mb-2">Verify Identity</h3>
+            <p id="otp-note" class="text-zinc-500 text-[9px] mb-8 uppercase tracking-[0.2em] font-bold"></p>
+            <input type="number" id="otp-input" class="input-field text-center text-4xl font-black mb-8 tracking-tighter" placeholder="000000">
+            <button onclick="verifyOtp()" class="w-full py-4 btn-orange rounded-2xl font-bold uppercase tracking-widest">Verify & Grant Access</button>
+        </div>
+    </div>
+
     <div id="app">
-        <!-- Auth -->
+        <!-- Auth View -->
         <div id="auth-screen" class="min-h-screen flex items-center justify-center p-6">
-            <div class="w-full max-w-md glass p-10 rounded-[3rem]">
+            <div class="w-full max-w-md glass p-10 rounded-[3.5rem] border border-white/5 shadow-2xl">
                 <h1 class="text-5xl font-black text-orange-500 text-center mb-10 tracking-tighter italic">OpenClass</h1>
                 <div id="signup-fields" class="hidden space-y-4 mb-4">
                     <input type="text" id="reg-name" placeholder="Full Name" class="input-field">
@@ -55,42 +61,31 @@
                     </select>
                 </div>
                 <div class="space-y-4">
-                    <input type="email" id="auth-email" placeholder="Email" class="input-field">
-                    <input type="password" id="auth-pass" placeholder="Password" class="input-field">
+                    <input type="email" id="auth-email" placeholder="Campus Email" class="input-field">
+                    <input type="password" id="auth-pass" placeholder="Security Password" class="input-field">
                     <button onclick="handleAuth()" id="primary-btn" class="w-full py-4 btn-orange rounded-2xl font-black uppercase tracking-widest">Sign In</button>
-                    <button onclick="toggleMode()" class="w-full text-[10px] text-zinc-600 font-bold uppercase tracking-widest mt-4">Switch to Registration</button>
+                    <button onclick="toggleMode()" class="w-full text-[10px] text-zinc-600 font-bold uppercase tracking-widest mt-4 hover:text-zinc-400 transition-colors">Create Campus Account</button>
                 </div>
             </div>
         </div>
 
-        <!-- Dashboard -->
+        <!-- Dashboard View -->
         <div id="dashboard" class="hidden min-h-screen">
             <nav class="p-5 glass border-b border-white/5 sticky top-0 z-50 flex justify-between px-10 items-center">
-                <h2 class="text-2xl font-black text-orange-500 tracking-tighter cursor-pointer" onclick="loadHome()">OPENCLASS <span class="shortcut">ALT+H</span></h2>
+                <h2 class="text-2xl font-black text-orange-500 tracking-tighter cursor-pointer italic" onclick="loadHome()">OpenClass</h2>
                 <div class="relative">
-                    <input type="text" id="g-search" onkeyup="handleSearch(event)" placeholder="Search Teachers (ALT+S)" class="bg-zinc-900 border border-white/5 rounded-xl px-6 py-2 text-sm w-80 outline-none focus:border-orange-500 transition-all">
-                    <div id="search-results" class="hidden absolute top-full left-0 right-0 mt-4 glass p-4 rounded-3xl border border-orange-500/20 max-h-[500px] overflow-y-auto"></div>
+                    <input type="text" id="g-search" onkeyup="handleSearch(event)" placeholder="Search Teacher or ID..." class="bg-zinc-900 border border-white/5 rounded-2xl px-6 py-2 text-sm w-80 outline-none focus:border-orange-500 transition-all focus:w-96">
+                    <div id="search-results" class="hidden absolute top-full left-0 right-0 mt-4 glass p-4 rounded-[2rem] border border-orange-500/20 max-h-[500px] overflow-y-auto shadow-2xl"></div>
                 </div>
-                <button onclick="logout()" class="text-xs font-bold text-zinc-600 hover:text-red-500">LOGOUT <span class="shortcut">ALT+L</span></button>
+                <button onclick="logout()" class="text-[10px] font-black text-zinc-600 hover:text-red-500 uppercase tracking-widest transition-colors">Logout</button>
             </nav>
             <main id="main-content" class="p-10 max-w-7xl mx-auto w-full"></main>
         </div>
     </div>
 
-    <!-- OTP Modal -->
-    <div id="otp-modal" class="hidden fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-6">
-        <div class="w-full max-w-sm glass p-10 rounded-[2.5rem] relative text-center">
-            <button onclick="closeOtp()" class="absolute top-6 right-6 text-zinc-500">✕</button>
-            <h3 class="text-2xl font-black mb-2">Verify OTP</h3>
-            <p id="otp-note" class="text-zinc-500 text-[10px] mb-8 uppercase tracking-widest"></p>
-            <input type="number" id="otp-input" class="input-field text-center text-4xl font-black mb-8" placeholder="000000">
-            <button onclick="verifyOtp()" class="w-full py-4 btn-orange rounded-2xl font-bold uppercase tracking-widest">Verify</button>
-        </div>
-    </div>
-
     <script>
         const CONFIG = {
-            URL: "https://script.google.com/macros/s/AKfycbxar4ALVTzA4-hTS6YxomvyTOzOsHMt-jE5Ek7qLfiNSYALYcKlu2m0J-D9LBcczwLA2Q/exec",
+            URL: "https://script.google.com/macros/s/AKfycbw54HE6U4MXm6Y9uO6JPnDT18afn6vNABeSyBYGE5ZZ7RJc9EBlxlzcVNDU7VkFMlLKHg/exec",
             EMAIL_SVC: "service_djr1n0f",
             EMAIL_TMP: "template_tiqnb53",
             EMAIL_PUB: "P88qoYcr5CHYVNAPw"
@@ -104,20 +99,18 @@
         function toast(msg, type="success") {
             const b = document.getElementById('toast-box');
             const d = document.createElement('div');
-            d.className = `glass px-6 py-4 rounded-2xl border-l-4 ${type==='success'?'border-orange-500':'border-red-500'} text-xs font-bold shadow-2xl`;
+            d.className = `glass px-6 py-4 rounded-2xl border-l-4 ${type==='success'?'border-orange-500':'border-red-500'} text-[10px] font-black uppercase tracking-widest shadow-2xl animate-bounce`;
             d.innerText = msg;
             b.appendChild(d);
             setTimeout(() => d.remove(), 4000);
         }
 
         function toggleLoader(s) { document.getElementById('global-loader').classList[s?'remove':'add']('hidden'); }
+        function closeOtp() { document.getElementById('otp-modal').classList.add('hidden'); genOtp = null; }
+        function closeVault() { document.getElementById('media-vault').classList.add('hidden'); document.getElementById('vault-frame').src=""; }
 
-        // Navigation
         window.addEventListener('keydown', e => {
-            if(e.altKey && e.key === 'h') loadHome();
-            if(e.altKey && e.key === 's') document.getElementById('g-search').focus();
-            if(e.altKey && e.key === 'l') logout();
-            if(e.key === 'Escape') { closeVault(); document.getElementById('otp-modal').classList.add('hidden'); }
+            if(e.key === 'Escape') { closeVault(); closeOtp(); }
         });
 
         if(user) renderDashboard();
@@ -134,7 +127,7 @@
             if(isSignup) {
                 genOtp = Math.floor(100000 + Math.random() * 900000);
                 pending = { email, password: pass, name: document.getElementById('reg-name').value, role: document.getElementById('reg-role').value };
-                document.getElementById('otp-note').innerText = `Sent to ${email}`;
+                document.getElementById('otp-note').innerText = `Code sent to ${email}`;
                 await emailjs.send(CONFIG.EMAIL_SVC, CONFIG.EMAIL_TMP, { to_email: email, otp: genOtp });
                 document.getElementById('otp-modal').classList.remove('hidden');
             } else {
@@ -150,9 +143,9 @@
             if(document.getElementById('otp-input').value == genOtp) {
                 toggleLoader(true);
                 await api("signup", pending);
-                toast("Registration Success!");
+                toast("Campus Access Granted!");
                 location.reload();
-            } else toast("Wrong OTP", "error");
+            } else toast("Wrong OTP Code", "error");
         }
 
         function renderDashboard() {
@@ -163,26 +156,28 @@
 
         async function loadHome() {
             const main = document.getElementById('main-content');
+            toggleLoader(true);
             if(user.role === 'TEACHER') {
                 main.innerHTML = `
                     <div class="grid lg:grid-cols-3 gap-10">
-                        <div class="glass p-8 rounded-[2.5rem] h-fit">
-                            <h3 class="text-orange-500 font-black text-[10px] uppercase mb-6 tracking-widest">Publish</h3>
-                            <input id="up-title" placeholder="Title" class="input-field mb-3">
-                            <input id="up-url" placeholder="URL" class="input-field mb-3">
-                            <select id="up-type" class="input-field mb-4"><option value="VIDEO">Video</option><option value="FILE">Document</option></select>
-                            <button onclick="publish()" class="w-full py-4 btn-orange rounded-xl font-bold text-xs uppercase">Post Live</button>
-                            <div class="mt-8 pt-6 border-t border-white/5"><p class="text-[10px] text-zinc-500 uppercase">ID: ${user.teacherId}</p></div>
+                        <div class="glass p-8 rounded-[3rem] h-fit sticky top-28 border border-white/5">
+                            <h3 class="text-orange-500 font-black text-[10px] uppercase mb-6 tracking-widest">Publish New Resource</h3>
+                            <input id="up-title" placeholder="Topic Title" class="input-field mb-3">
+                            <input id="up-url" placeholder="Resource URL (YouTube/PDF)" class="input-field mb-3">
+                            <select id="up-type" class="input-field mb-6"><option value="VIDEO">Video Lesson</option><option value="FILE">Static File</option></select>
+                            <button onclick="publish()" class="w-full py-4 btn-orange rounded-2xl font-bold text-xs uppercase tracking-widest">Post Live</button>
+                            <div class="mt-8 pt-6 border-t border-white/5"><p class="text-[9px] text-zinc-500 uppercase font-black">Campus ID: ${user.teacherId}</p></div>
                         </div>
                         <div id="feed" class="lg:col-span-2 space-y-6"></div>
                     </div>`;
                 const data = await api("search", { email: user.email }, user.teacherId);
-                renderFeed(data[0]?.id ? data : [], true);
+                renderFeed(data[0]?.posts || [], true);
             } else {
                 main.innerHTML = `<div id="feed" class="max-w-2xl mx-auto space-y-6"></div>`;
                 const data = await api("get_subscribed_feed", { email: user.email });
                 renderFeed(data, false);
             }
+            toggleLoader(false);
         }
 
         async function handleSearch(e) {
@@ -190,35 +185,83 @@
             const resDiv = document.getElementById('search-results');
             if(q.length < 2) return resDiv.classList.add('hidden');
             resDiv.classList.remove('hidden');
-            resDiv.innerHTML = `<p class="p-4 text-center text-xs text-zinc-600 animate-pulse">Searching...</p>`;
+            resDiv.innerHTML = `<p class="p-4 text-center text-[10px] font-black text-zinc-700 animate-pulse uppercase">Scanning Campus Network...</p>`;
             const data = await api("search", { email: user.email }, q);
             resDiv.innerHTML = data.map(t => `
-                <div class="p-4 hover:bg-white/5 rounded-2xl flex justify-between items-center">
-                    <div>
-                        <p class="font-bold text-sm">${t.name}</p>
-                        <p class="text-[9px] text-zinc-500 uppercase">${t.postCount} Posts • ${t.subCount} Subs</p>
+                <div class="p-4 hover:bg-white/5 rounded-2xl flex justify-between items-center cursor-pointer group" onclick="viewTeacherProfile('${t.id}')">
+                    <div class="flex-grow">
+                        <div class="flex items-center gap-2">
+                            <p class="font-bold text-sm">${t.name}</p>
+                            <span class="text-[8px] bg-orange-500/10 text-orange-500 px-2 py-0.5 rounded-full font-black">${t.id}</span>
+                        </div>
+                        <p class="text-[9px] text-zinc-500 uppercase font-bold tracking-widest">${t.postCount} Posts • ${t.subCount} Subs</p>
                     </div>
-                    <button onclick="${t.isSubscribed ? 'unsub' : 'sub'}('${t.id}')" class="px-4 py-2 ${t.isSubscribed?'bg-zinc-800 text-zinc-500':'btn-orange'} rounded-xl text-[9px] font-bold uppercase">${t.isSubscribed?'Unsubscribe':'Subscribe'}</button>
+                    <button onclick="event.stopPropagation(); toggleSub(this, '${t.id}', ${t.isSubscribed})" class="ml-4 px-4 py-2 ${t.isSubscribed?'bg-zinc-800 text-zinc-600':'btn-orange'} rounded-xl text-[9px] font-black uppercase transition-all">
+                        ${t.isSubscribed?'Unsubscribe':'Subscribe'}
+                    </button>
                 </div>`).join('');
         }
 
-        async function sub(tId) { toggleLoader(true); await api("subscribe", { studentEmail: user.email, teacherId: tId }); loadHome(); toggleLoader(false); toast("Subscribed!"); }
-        async function unsub(tId) { toggleLoader(true); await api("unsubscribe", { studentEmail: user.email, teacherId: tId }); loadHome(); toggleLoader(false); toast("Unsubscribed"); }
+        async function toggleSub(btn, tId, isSubbed) {
+            btn.disabled = true;
+            const action = isSubbed ? "unsubscribe" : "subscribe";
+            await api(action, { studentEmail: user.email, teacherId: tId });
+            toast(`${isSubbed?'Removed':'Added'} Teacher!`);
+            handleSearch({ target: { value: document.getElementById('g-search').value } });
+            if(user.role === 'STUDENT') loadHome();
+        }
+
+        async function viewTeacherProfile(tId) {
+            toggleLoader(true);
+            const data = await api("search", { email: user.email }, tId);
+            const t = data[0];
+            const main = document.getElementById('main-content');
+            main.innerHTML = `
+                <div class="max-w-4xl mx-auto">
+                    <button onclick="loadHome()" class="mb-8 text-zinc-500 text-[10px] font-black uppercase tracking-widest hover:text-white transition-colors">← Back to Feed</button>
+                    <div class="glass p-10 rounded-[3rem] border border-orange-500/10 mb-10 flex justify-between items-center">
+                        <div>
+                            <span class="text-[9px] text-orange-500 font-black uppercase tracking-widest">Verified Instructor</span>
+                            <h2 class="text-4xl font-black italic tracking-tighter mt-1">${t.name}</h2>
+                            <p class="text-zinc-500 font-bold text-sm">${t.institute}</p>
+                        </div>
+                        <div class="flex gap-10">
+                            <div class="text-center"><p class="text-[9px] text-zinc-600 font-bold uppercase">Resources</p><p class="text-3xl font-black">${t.postCount}</p></div>
+                            <div class="text-center"><p class="text-[9px] text-zinc-600 font-bold uppercase">Followers</p><p class="text-3xl font-black">${t.subCount}</p></div>
+                        </div>
+                    </div>
+                    <div class="space-y-4">${t.posts.map(p => `
+                        <div class="glass p-6 rounded-[2rem] flex justify-between items-center group border border-transparent hover:border-white/5 transition-all">
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 bg-zinc-900 rounded-2xl flex items-center justify-center">${p.type==='VIDEO'?'🎬':'📄'}</div>
+                                <p class="font-bold text-sm text-zinc-200">${p.title}</p>
+                            </div>
+                            <button onclick="openResource('${p.id}','${p.url}','${p.type}','${p.title}')" class="bg-white text-black px-6 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:scale-105 transition-all">Access</button>
+                        </div>`).join('')}</div>
+                </div>`;
+            document.getElementById('search-results').classList.add('hidden');
+            toggleLoader(false);
+        }
+
+        async function publish() {
+            const p = { teacherId: user.teacherId, teacherName: user.name, title: document.getElementById('up-title').value, url: document.getElementById('up-url').value, type: document.getElementById('up-type').value };
+            toggleLoader(true); await api("upload", p); toast("Published Live!"); loadHome();
+        }
 
         function renderFeed(data, isT) {
             const f = document.getElementById('feed');
-            if(!data.length) { f.innerHTML = `<p class="text-center py-20 text-zinc-700 uppercase text-[10px] font-bold tracking-[0.5em]">No content available</p>`; return; }
+            if(!data || !data.length) { f.innerHTML = `<p class="text-center py-20 text-zinc-800 uppercase text-[9px] font-black tracking-[0.6em]">No campus activity found</p>`; return; }
             f.innerHTML = data.map(i => `
-                <div class="glass p-6 rounded-[2rem] flex justify-between items-center border border-transparent hover:border-orange-500/20 transition-all">
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 bg-zinc-900 rounded-2xl flex items-center justify-center">${i.type==='VIDEO'?'🎬':'📄'}</div>
+                <div class="glass p-8 rounded-[2.5rem] flex justify-between items-center border border-transparent hover:border-orange-500/20 transition-all group">
+                    <div class="flex items-center gap-6">
+                        <div class="w-14 h-14 bg-zinc-900 rounded-3xl flex items-center justify-center group-hover:bg-zinc-800 transition-all">${i.type==='VIDEO'?'🎬':'📄'}</div>
                         <div>
-                            <p class="text-[9px] text-orange-500 font-black uppercase">${i.type}</p>
-                            <h4 class="font-bold">${i.title}</h4>
-                            <p class="text-[9px] text-zinc-600 uppercase font-bold">${i.views||0} Views</p>
+                            <p class="text-[9px] text-orange-500 font-black uppercase tracking-widest">${i.type}</p>
+                            <h4 class="font-black text-xl text-zinc-200 tracking-tight">${i.title}</h4>
+                            <p class="text-[9px] text-zinc-600 font-bold uppercase tracking-widest">${i.views||0} Secure Views</p>
                         </div>
                     </div>
-                    <button onclick="openResource('${i.id}','${i.url}','${i.type}','${i.title}')" class="bg-white text-black px-6 py-2 rounded-xl text-[10px] font-bold uppercase">Open</button>
+                    <button onclick="openResource('${i.id}','${i.url}','${i.type}','${i.title}')" class="bg-white text-black px-8 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-orange-500 hover:text-white transition-all">Grant Access</button>
                 </div>`).join('');
         }
 
@@ -238,7 +281,6 @@
             return await r.json();
         }
 
-        function closeVault() { document.getElementById('media-vault').classList.add('hidden'); document.getElementById('vault-frame').src=""; }
         function logout() { localStorage.clear(); location.reload(); }
     </script>
 </body>
