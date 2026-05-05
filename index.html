@@ -3,45 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OpenClass | Secure Hub</title>
+    <title>OpenClass Pro | Secure LMS</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        body { background-color: #050505; color: white; font-family: sans-serif; overflow-x: hidden; }
-        .glass { background: rgba(15, 15, 15, 0.8); backdrop-filter: blur(12px); border: 1px solid #333; }
-        .no-select { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+        body { background: #000; color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; }
+        .glass { background: rgba(18, 18, 18, 0.7); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.05); }
+        .btn-orange { background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); transition: all 0.3s ease; }
+        .btn-orange:hover { transform: translateY(-2px); box-shadow: 0 10px 20px -10px #f97316; }
+        .input-field { background: #111; border: 1px solid #222; padding: 1rem; border-radius: 12px; width: 100%; outline: none; transition: border 0.3s; }
+        .input-field:focus { border-color: #f97316; }
+        .no-select { user-select: none; -webkit-user-select: none; }
+        iframe { pointer-events: auto !important; }
     </style>
 </head>
 <body class="no-select">
 
-    <!-- AUTH SCREEN -->
-    <div id="auth-screen" class="min-h-screen flex flex-col items-center justify-center p-6">
-        <h1 class="text-6xl font-black text-orange-500 mb-12 tracking-tighter text-center">OpenClass</h1>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-2xl">
-            <button onclick="startAuth('TEACHER')" class="p-10 border-2 border-orange-500/30 rounded-3xl hover:bg-orange-500 transition-all text-2xl font-bold uppercase">Teacher</button>
-            <button onclick="startAuth('STUDENT')" class="p-10 border-2 border-blue-500/30 rounded-3xl hover:bg-blue-500 transition-all text-2xl font-bold uppercase">Student</button>
-        </div>
-    </div>
+    <div id="app">
+        <!-- Auth Screen -->
+        <div id="auth-container" class="min-h-screen flex items-center justify-center p-6">
+            <div class="w-full max-w-md glass p-10 rounded-[2.5rem]">
+                <div class="text-center mb-8">
+                    <h1 class="text-4xl font-black text-orange-500 tracking-tighter">OpenClass</h1>
+                    <p id="auth-subtitle" class="text-zinc-500 text-sm mt-2">Sign in to your campus</p>
+                </div>
 
-    <!-- APP SCREEN -->
-    <div id="app-screen" class="hidden min-h-screen flex flex-col">
-        <nav class="p-4 border-b border-zinc-800 flex justify-between items-center glass sticky top-0 z-50">
-            <h2 class="text-xl font-black text-orange-500">OPENCLASS</h2>
-            <div class="flex items-center gap-4">
-                <span id="user-display" class="text-xs text-zinc-500 bg-zinc-900 px-2 py-1 rounded"></span>
-                <button onclick="logout()" class="text-xs text-zinc-500 hover:text-red-500 font-bold">LOGOUT</button>
+                <div id="auth-form" class="space-y-4">
+                    <!-- Fields toggle dynamically -->
+                    <div id="signup-fields" class="hidden space-y-4">
+                        <input type="text" id="reg-name" placeholder="Full Name" class="input-field">
+                        <input type="text" id="reg-inst" placeholder="Institute/School" class="input-field">
+                        <input type="number" id="reg-age" placeholder="Age" class="input-field">
+                        <select id="reg-role" class="input-field">
+                            <option value="STUDENT">I am a Student</option>
+                            <option value="TEACHER">I am a Teacher</option>
+                        </select>
+                    </div>
+                    <input type="email" id="auth-email" placeholder="Email Address" class="input-field">
+                    <input type="password" id="auth-pass" placeholder="Password" class="input-field">
+                    
+                    <button onclick="handleAuth()" id="primary-btn" class="w-full py-4 btn-orange rounded-xl font-bold uppercase tracking-widest mt-4">Login</button>
+                    <p class="text-center text-sm text-zinc-500 mt-6">
+                        <span id="toggle-text">Don't have an account?</span>
+                        <button onclick="toggleAuthMode()" class="text-orange-500 font-bold ml-1">Click here</button>
+                    </p>
+                </div>
             </div>
-        </nav>
-        <main id="main-content" class="p-6 max-w-4xl mx-auto w-full space-y-8"></main>
+        </div>
+
+        <!-- Dashboard -->
+        <div id="dashboard-container" class="hidden min-h-screen">
+            <nav class="p-4 border-b border-white/5 glass flex justify-between items-center sticky top-0 z-50">
+                <h2 class="text-xl font-black text-orange-500 tracking-tighter">OPENCLASS</h2>
+                <div class="flex items-center gap-4">
+                    <div class="text-right hidden md:block">
+                        <p id="nav-name" class="text-xs font-bold"></p>
+                        <p id="nav-id" class="text-[10px] text-zinc-500 font-mono uppercase"></p>
+                    </div>
+                    <button onclick="logout()" class="p-2 hover:bg-red-500/10 rounded-full text-zinc-500 hover:text-red-500"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button>
+                </div>
+            </nav>
+
+            <main id="dashboard-content" class="p-6 max-w-5xl mx-auto space-y-8"></main>
+        </div>
     </div>
 
-    <!-- PLAYER MODAL -->
-    <div id="video-modal" class="hidden fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-4">
-        <button onclick="closePlayer()" class="absolute top-6 right-6 text-white text-2xl">✕</button>
-        <div class="relative w-full max-w-5xl aspect-video rounded-2xl overflow-hidden shadow-2xl border border-zinc-800">
-            <div class="absolute inset-0 z-10 bg-transparent" oncontextmenu="return false;"></div> 
-            <iframe id="player-frame" class="w-full h-full" allowfullscreen allow="autoplay"></iframe>
+    <!-- Protected Player -->
+    <div id="player-modal" class="hidden fixed inset-0 z-[100] bg-black/98 flex flex-col items-center justify-center">
+        <button onclick="closePlayer()" class="absolute top-8 right-8 text-zinc-500 hover:text-white transition-colors">✕ Close</button>
+        <div class="w-full max-w-4xl aspect-video glass rounded-3xl overflow-hidden relative border border-white/10">
+            <!-- The blocking overlay is now behind the controls or transparent but allowing interaction -->
+            <div class="absolute inset-0 z-10 pointer-events-none border-[20px] border-black/20"></div>
+            <iframe id="main-player" class="w-full h-full" allowfullscreen allow="autoplay; encrypted-media"></iframe>
         </div>
+        <p class="mt-4 text-[10px] text-zinc-600 uppercase tracking-[0.3em]">Encrypted Stream • Unauthorized recording is prohibited</p>
     </div>
 
     <script>
@@ -52,137 +88,165 @@
             EMAILJS_TMP: "template_tiqnb53"
         };
 
-        emailjs.init(CONFIG.EMAILJS_PUB);
+        emailjs.init(CONFIG.EMAIL_PUB);
+        let user = JSON.parse(localStorage.getItem('oc_user'));
+        let isSignup = false;
 
-        let currentEmail = localStorage.getItem('oc_email');
-        let currentRole = localStorage.getItem('oc_role');
+        if(user) renderDashboard();
 
-        // Automatic login if data exists
-        if(currentEmail && currentRole) {
-            window.onload = () => showDashboard();
+        function toggleAuthMode() {
+            isSignup = !isSignup;
+            document.getElementById('signup-fields').classList.toggle('hidden');
+            document.getElementById('auth-subtitle').innerText = isSignup ? "Create your profile" : "Sign in to your campus";
+            document.getElementById('primary-btn').innerText = isSignup ? "Verify & Register" : "Login";
+            document.getElementById('toggle-text').innerText = isSignup ? "Already have an account?" : "Don't have an account?";
         }
 
-        async function startAuth(role) {
-            const email = prompt("Enter your email:");
-            if(!email || !email.includes('@')) return;
+        async function handleAuth() {
+            const email = document.getElementById('auth-email').value;
+            const pass = document.getElementById('auth-pass').value;
 
-            const otp = Math.floor(100000 + Math.random() * 900000);
-            
-            emailjs.send(CONFIG.EMAILJS_SVC, CONFIG.EMAILJS_TMP, {
-                to_email: email, 
-                otp: otp
-            })
-            .then(function() {
-                const userOtp = prompt("Enter the code sent to " + email);
+            if(isSignup) {
+                const name = document.getElementById('reg-name').value;
+                const otp = Math.floor(100000 + Math.random() * 900000);
+                
+                await emailjs.send(CONFIG.EMAIL_SVC, CONFIG.EMAIL_TMP, { to_email: email, otp: otp });
+                const userOtp = prompt("Enter OTP sent to " + email);
+                
                 if(userOtp == otp) {
-                    localStorage.setItem('oc_email', email);
-                    localStorage.setItem('oc_role', role);
-                    currentEmail = email;
-                    currentRole = role;
-                    showDashboard();
-                } else {
-                    alert("Invalid OTP code.");
+                    const res = await fetch(CONFIG.URL, {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            action: "signup",
+                            payload: { email, password: pass, name, institute: document.getElementById('reg-inst').value, age: document.getElementById('reg-age').value, role: document.getElementById('reg-role').value }
+                        })
+                    });
+                    alert("Account Created! Please login.");
+                    toggleAuthMode();
                 }
-            }, function(err) {
-                alert("Failed to send OTP. Error: " + JSON.stringify(err));
-            });
+            } else {
+                const res = await fetch(CONFIG.URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: "login", payload: { email, password: pass } })
+                });
+                const userData = await res.json();
+                if(typeof userData === 'object') {
+                    localStorage.setItem('oc_user', JSON.stringify(userData));
+                    user = userData;
+                    renderDashboard();
+                } else {
+                    alert(userData);
+                }
+            }
         }
 
-        function showDashboard() {
-            // 1. Switch Screen Visibility First
-            document.getElementById('auth-screen').style.display = 'none';
-            document.getElementById('app-screen').classList.remove('hidden');
-            document.getElementById('user-display').innerText = currentEmail;
+        function renderDashboard() {
+            document.getElementById('auth-container').classList.add('hidden');
+            document.getElementById('dashboard-container').classList.remove('hidden');
+            document.getElementById('nav-name').innerText = user.name;
+            document.getElementById('nav-id').innerText = user.teacherId || "Student Account";
             
-            const main = document.getElementById('main-content');
-            const teacherId = "OC-" + currentEmail.split('@')[0].toUpperCase();
-
-            // 2. Load UI based on Role
-            if(currentRole === 'TEACHER') {
+            const main = document.getElementById('dashboard-content');
+            if(user.role === 'TEACHER') {
                 main.innerHTML = `
-                    <div class="p-8 glass rounded-3xl border-orange-500/20">
-                        <h3 class="text-orange-500 font-bold uppercase text-[10px] mb-1">Public ID</h3>
-                        <p class="text-4xl font-black">${teacherId}</p>
+                    <div class="grid md:grid-cols-3 gap-6">
+                        <div class="md:col-span-2 space-y-6">
+                            <div class="glass p-8 rounded-[2rem] space-y-4">
+                                <h3 class="text-sm font-bold text-orange-500 uppercase">Publish Content</h3>
+                                <input id="c-title" placeholder="Lesson Title" class="input-field">
+                                <input id="c-url" placeholder="Video/PDF URL" class="input-field">
+                                <button onclick="saveContent()" class="w-full py-4 btn-orange rounded-xl font-bold uppercase">Push Live</button>
+                            </div>
+                            <div class="space-y-4">
+                                <h3 class="text-zinc-500 font-bold uppercase text-xs tracking-widest">Library Management</h3>
+                                <div id="content-list" class="grid gap-3"></div>
+                            </div>
+                        </div>
+                        <div class="glass p-8 rounded-[2rem] h-fit">
+                            <h3 class="text-orange-500 font-bold uppercase text-xs mb-4">Teacher Profile</h3>
+                            <p class="text-2xl font-black">${user.teacherId}</p>
+                            <p class="text-zinc-500 text-sm mt-2">Students use this ID to find your lessons.</p>
+                        </div>
                     </div>
-                    <div class="glass p-6 rounded-3xl space-y-4">
-                        <input id="title" placeholder="Lesson Title" class="w-full p-4 bg-black rounded-xl border border-zinc-800 outline-none focus:border-orange-500">
-                        <input id="url" placeholder="Video Link (YouTube) or PDF URL" class="w-full p-4 bg-black rounded-xl border border-zinc-800 outline-none focus:border-orange-500">
-                        <button onclick="saveLink()" class="w-full py-4 bg-orange-600 rounded-xl font-bold uppercase">Publish</button>
-                    </div>
-                    <div id="teacher-list" class="space-y-3"></div>
                 `;
-                fetchContent(teacherId, 'teacher-list');
+                loadContent(user.teacherId);
             } else {
                 main.innerHTML = `
-                    <div class="flex gap-2">
-                        <input id="search-id" placeholder="Enter Teacher ID (OC-NAME)" class="flex-grow p-4 bg-zinc-900 rounded-2xl border border-zinc-800 outline-none focus:border-blue-500">
-                        <button onclick="searchTeacher()" class="bg-blue-600 px-8 rounded-2xl font-bold uppercase">Find</button>
+                    <div class="max-w-2xl mx-auto space-y-8">
+                        <div class="flex gap-2">
+                            <input id="search-id" placeholder="Enter Teacher ID (e.g. OC-KUNAL123)" class="input-field">
+                            <button onclick="searchContent()" class="btn-orange px-8 rounded-xl font-bold uppercase">Find</button>
+                        </div>
+                        <div id="content-list" class="grid gap-4"></div>
                     </div>
-                    <div id="student-list" class="grid gap-4 mt-8"></div>
                 `;
             }
         }
 
-        async function saveLink() {
-            const title = document.getElementById('title').value;
-            const url = document.getElementById('url').value;
-            const teacherId = "OC-" + currentEmail.split('@')[0].toUpperCase();
-            if(!title || !url) return alert("Fill all fields");
-
-            await fetch(CONFIG.SHEET_URL, {
+        async function saveContent() {
+            const title = document.getElementById('c-title').value;
+            const url = document.getElementById('c-url').value;
+            await fetch(CONFIG.URL, {
                 method: 'POST',
-                mode: 'no-cors',
-                body: JSON.stringify({
-                    type: "content",
-                    action: "save",
-                    row: [teacherId, title, url, url.toLowerCase().includes('.pdf') ? 'PDF' : 'VIDEO']
-                })
+                body: JSON.stringify({ action: "save_content", payload: { teacherId: user.teacherId, title, url, type: url.includes('.pdf') ? 'PDF' : 'VIDEO' } })
             });
             alert("Published!");
-            fetchContent(teacherId, 'teacher-list');
+            loadContent(user.teacherId);
         }
 
-        async function fetchContent(id, containerId) {
-            try {
-                const res = await fetch(CONFIG.SHEET_URL + "?teacherId=" + id);
-                const data = await res.json();
-                const list = document.getElementById(containerId);
-                if(!list) return;
-
-                if(data.length === 0) {
-                    list.innerHTML = `<p class="text-zinc-600 italic">No lessons found.</p>`;
-                    return;
-                }
-
-                list.innerHTML = data.map(item => `
-                    <div class="glass p-4 rounded-xl flex justify-between items-center">
-                        <div><p class="font-bold text-sm">${item[1]}</p><p class="text-[10px] text-zinc-500 uppercase">${item[3]}</p></div>
-                        <button onclick="openContent('${item[2]}', '${item[3]}')" class="bg-white text-black px-4 py-2 rounded-lg font-bold text-[10px] uppercase">Open</button>
+        async function loadContent(id) {
+            const res = await fetch(CONFIG.URL + "?teacherId=" + id);
+            const data = await res.json();
+            const list = document.getElementById('content-list');
+            list.innerHTML = data.map(item => `
+                <div class="glass p-5 rounded-2xl flex justify-between items-center group">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-full bg-zinc-900 flex items-center justify-center text-orange-500 font-bold">
+                            ${item.type === 'VIDEO' ? '▶' : '📄'}
+                        </div>
+                        <div>
+                            <p class="font-bold">${item.title}</p>
+                            <p class="text-[10px] text-zinc-500 font-bold uppercase">${item.views || 0} Views • ${item.type}</p>
+                        </div>
                     </div>
-                `).join('');
-            } catch(e) { console.error("Data error:", e); }
+                    <div class="flex gap-2">
+                        <button onclick="openPlayer('${item.id}', '${item.url}', '${item.type}')" class="bg-white text-black px-4 py-2 rounded-lg font-bold text-[10px] uppercase">Access</button>
+                        ${user.role === 'TEACHER' ? `<button onclick="deleteContent('${item.id}')" class="p-2 text-zinc-600 hover:text-red-500 transition-colors">🗑️</button>` : ''}
+                    </div>
+                </div>
+            `).join('');
         }
 
-        function searchTeacher() {
-            const id = document.getElementById('search-id').value.toUpperCase().trim();
-            if(id) fetchContent(id, 'student-list');
+        async function deleteContent(id) {
+            if(!confirm("Delete this lesson?")) return;
+            await fetch(CONFIG.URL, { method: 'POST', body: JSON.stringify({ action: "delete_content", payload: { id } }) });
+            loadContent(user.teacherId);
         }
 
-        function openContent(url, type) {
+        async function openPlayer(id, url, type) {
+            // Track view
+            fetch(CONFIG.URL, { method: 'POST', body: JSON.stringify({ action: "track_view", payload: { id } }) });
+            
             if(type === 'VIDEO') {
-                let embedUrl = url;
-                if(url.includes("watch?v=")) embedUrl = url.replace("watch?v=", "embed/");
-                if(url.includes("youtu.be/")) embedUrl = url.replace("youtu.be/", "youtube.com/embed/");
-                document.getElementById('player-frame').src = embedUrl;
-                document.getElementById('video-modal').classList.remove('hidden');
+                let videoId = "";
+                if(url.includes("v=")) videoId = url.split("v=")[1].split("&")[0];
+                else if(url.includes("youtu.be/")) videoId = url.split("youtu.be/")[1];
+                
+                document.getElementById('main-player').src = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1`;
+                document.getElementById('player-modal').classList.remove('hidden');
             } else {
                 window.open(url, '_blank');
             }
         }
 
+        function searchContent() {
+            const id = document.getElementById('search-id').value.toUpperCase();
+            loadContent(id);
+        }
+
         function closePlayer() {
-            document.getElementById('video-modal').classList.add('hidden');
-            document.getElementById('player-frame').src = "";
+            document.getElementById('player-modal').classList.add('hidden');
+            document.getElementById('main-player').src = "";
         }
 
         function logout() { localStorage.clear(); location.reload(); }
