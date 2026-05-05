@@ -4,30 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OpenClass Pro | Secure Learning</title>
+    <!-- Standard Tailwind Play CDN (fine for GitHub Pages pilots) -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <style>
-        body { background: #050505; color: #fff; font-family: sans-serif; overflow-x: hidden; }
+        body { background: #050505; color: #fff; font-family: sans-serif; }
         .glass { background: rgba(18, 18, 18, 0.8); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); }
         .btn-orange { background: #f97316; transition: all 0.3s; }
         .btn-orange:hover { background: #ea580c; transform: scale(1.02); }
-        .input-field { background: #111; border: 1px solid #222; padding: 12px; border-radius: 12px; width: 100%; outline: none; }
+        .input-field { background: #111; border: 1px solid #222; padding: 12px; border-radius: 12px; width: 100%; outline: none; color: white; }
         .input-field:focus { border-color: #f97316; }
-        .no-select { user-select: none; -webkit-user-select: none; }
     </style>
 </head>
-<body class="no-select">
+<body>
 
     <div id="auth-container" class="min-h-screen flex items-center justify-center p-6">
         <div class="w-full max-w-md glass p-8 rounded-[2rem]">
-            <h1 class="text-4xl font-black text-orange-500 text-center mb-2">OpenClass</h1>
-            <p id="auth-msg" class="text-center text-zinc-500 text-sm mb-8">Login to your account</p>
-
-            <div class="space-y-4">
+            <h1 class="text-4xl font-black text-orange-500 text-center mb-8">OpenClass</h1>
+            <div id="auth-form" class="space-y-4">
                 <div id="signup-fields" class="hidden space-y-4">
                     <input type="text" id="reg-name" placeholder="Full Name" class="input-field">
                     <input type="text" id="reg-inst" placeholder="Institute" class="input-field">
-                    <input type="number" id="reg-age" placeholder="Age" class="input-field">
                     <select id="reg-role" class="input-field">
                         <option value="STUDENT">Student</option>
                         <option value="TEACHER">Teacher</option>
@@ -35,10 +32,9 @@
                 </div>
                 <input type="email" id="auth-email" placeholder="Email" class="input-field">
                 <input type="password" id="auth-pass" placeholder="Password" class="input-field">
-                
                 <button onclick="handleAuth()" id="primary-btn" class="w-full py-4 btn-orange rounded-xl font-bold uppercase mt-4">Login</button>
                 <p class="text-center text-sm text-zinc-500 mt-6">
-                    <button onclick="toggleAuth()" class="text-orange-500 font-bold">Create an account / Sign In</button>
+                    <button onclick="toggleAuth()" class="text-orange-500 font-bold">Switch Login / Signup</button>
                 </p>
             </div>
         </div>
@@ -47,17 +43,9 @@
     <div id="dashboard" class="hidden min-h-screen flex flex-col">
         <nav class="p-4 border-b border-zinc-800 glass flex justify-between items-center sticky top-0 z-50">
             <h2 class="text-xl font-black text-orange-500">OPENCLASS</h2>
-            <button onclick="logout()" class="text-zinc-500 hover:text-red-500">LOGOUT</button>
+            <button onclick="logout()" class="text-zinc-500 hover:text-red-500 font-bold">LOGOUT</button>
         </nav>
         <main id="content" class="p-6 max-w-4xl mx-auto w-full"></main>
-    </div>
-
-    <div id="player-modal" class="hidden fixed inset-0 z-[100] bg-black/95 flex flex-col items-center justify-center p-4">
-        <button onclick="closePlayer()" class="absolute top-6 right-6 text-white text-3xl">✕</button>
-        <div class="relative w-full max-w-4xl aspect-video rounded-2xl overflow-hidden border border-zinc-800 bg-black">
-            <div class="absolute inset-0 z-10 bg-transparent"></div>
-            <iframe id="main-player" class="w-full h-full" allowfullscreen allow="autoplay"></iframe>
-        </div>
     </div>
 
     <script>
@@ -77,8 +65,7 @@
         function toggleAuth() {
             isSignup = !isSignup;
             document.getElementById('signup-fields').classList.toggle('hidden');
-            document.getElementById('auth-msg').innerText = isSignup ? "Create a new profile" : "Login to your account";
-            document.getElementById('primary-btn').innerText = isSignup ? "Verify & Sign Up" : "Login";
+            document.getElementById('primary-btn').innerText = isSignup ? "Verify & Register" : "Login";
         }
 
         async function handleAuth() {
@@ -86,19 +73,27 @@
             const pass = document.getElementById('auth-pass').value;
             const btn = document.getElementById('primary-btn');
 
-            if(!email || !pass) return alert("Fill all fields");
-            btn.disabled = true; btn.innerText = "Please wait...";
+            if(!email || !pass) return alert("Please fill all fields");
+            btn.disabled = true; btn.innerText = "Connecting...";
 
             try {
                 if(isSignup) {
                     const otp = Math.floor(100000 + Math.random() * 900000);
                     await emailjs.send(CONFIG.EMAIL_SVC, CONFIG.EMAIL_TMP, { to_email: email, otp: otp });
                     if(prompt("Enter OTP sent to " + email) == otp) {
-                        const res = await fetch(CONFIG.URL, {
-                            method: 'POST',
-                            body: JSON.stringify({ action: "signup", payload: { email, password: pass, name: document.getElementById('reg-name').value, institute: document.getElementById('reg-inst').value, age: document.getElementById('reg-age').value, role: document.getElementById('reg-role').value }})
-                        });
-                        alert("Account created! Now please login.");
+                        const payload = { 
+                            action: "signup", 
+                            payload: { 
+                                email, password: pass, 
+                                name: document.getElementById('reg-name').value, 
+                                role: document.getElementById('reg-role').value,
+                                institute: document.getElementById('reg-inst').value,
+                                age: 0 
+                            }
+                        };
+                        // Use text() then parse for Google Script compatibility
+                        const res = await fetch(CONFIG.URL, { method: 'POST', body: JSON.stringify(payload) });
+                        alert("Account ready! Please Login.");
                         location.reload();
                     }
                 } else {
@@ -110,8 +105,11 @@
                         renderUI();
                     } else { alert(data); }
                 }
-            } catch(e) { alert("Error connecting to server"); }
-            btn.disabled = false; btn.innerText = isSignup ? "Verify & Sign Up" : "Login";
+            } catch(e) {
+                console.error(e);
+                alert("Server Connection Error. Check if your Script URL is correct and deployed as 'Anyone'.");
+            }
+            btn.disabled = false; btn.innerText = isSignup ? "Register" : "Login";
         }
 
         function renderUI() {
@@ -120,73 +118,12 @@
             const main = document.getElementById('content');
             
             if(user.role === 'TEACHER') {
-                main.innerHTML = `
-                    <div class="space-y-6">
-                        <div class="p-8 glass rounded-3xl border-orange-500/20">
-                            <p class="text-orange-500 font-bold text-xs uppercase">Public Campus ID</p>
-                            <h2 class="text-4xl font-black">${user.teacherId}</h2>
-                        </div>
-                        <div class="glass p-6 rounded-2xl space-y-4">
-                            <input id="title" placeholder="Lesson Title" class="input-field">
-                            <input id="url" placeholder="Video/PDF URL" class="input-field">
-                            <button onclick="publish()" class="w-full py-4 btn-orange rounded-xl font-bold uppercase">Publish Lesson</button>
-                        </div>
-                        <div id="list" class="space-y-3"></div>
-                    </div>
-                `;
-                loadData(user.teacherId);
+                main.innerHTML = `<div class="p-8 glass rounded-3xl"><h2 class="text-4xl font-black">${user.teacherId}</h2><p class="text-zinc-500">Teacher Dashboard Ready</p></div>`;
             } else {
-                main.innerHTML = `
-                    <div class="space-y-6">
-                        <div class="flex gap-2">
-                            <input id="sid" placeholder="Enter Teacher ID" class="input-field">
-                            <button onclick="search()" class="btn-orange px-8 rounded-xl font-bold uppercase">Find</button>
-                        </div>
-                        <div id="list" class="grid gap-3"></div>
-                    </div>
-                `;
+                main.innerHTML = `<div class="p-8 glass rounded-3xl"><h2 class="text-4xl font-black">Welcome, Student</h2><p class="text-zinc-500">Use the search bar to find teachers.</p></div>`;
             }
         }
 
-        async function publish() {
-            const title = document.getElementById('title').value;
-            const url = document.getElementById('url').value;
-            await fetch(CONFIG.URL, { method: 'POST', body: JSON.stringify({ action: "save_content", payload: { teacherId: user.teacherId, title, url, type: url.includes('.pdf') ? 'PDF' : 'VIDEO' }}) });
-            alert("Published!");
-            loadData(user.teacherId);
-        }
-
-        async function loadData(id) {
-            const res = await fetch(CONFIG.URL + "?teacherId=" + id);
-            const data = await res.json();
-            document.getElementById('list').innerHTML = data.map(i => `
-                <div class="glass p-5 rounded-2xl flex justify-between items-center">
-                    <div><p class="font-bold">${i.title}</p><p class="text-[10px] text-zinc-500 uppercase">${i.views} Views • ${i.type}</p></div>
-                    <div class="flex gap-2">
-                        <button onclick="play('${i.id}','${i.url}','${i.type}')" class="bg-white text-black px-4 py-2 rounded-lg font-bold text-[10px] uppercase">Access</button>
-                        ${user.role === 'TEACHER' ? `<button onclick="del('${i.id}')" class="text-zinc-600">🗑️</button>` : ''}
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        async function del(id) {
-            if(!confirm("Delete?")) return;
-            await fetch(CONFIG.URL, { method: 'POST', body: JSON.stringify({ action: "delete_content", payload: { id }}) });
-            loadData(user.teacherId);
-        }
-
-        function play(id, url, type) {
-            fetch(CONFIG.URL, { method: 'POST', body: JSON.stringify({ action: "track_view", payload: { id }}) });
-            if(type === 'VIDEO') {
-                let vid = url.includes('v=') ? url.split('v=')[1].split('&')[0] : url.split('/').pop();
-                document.getElementById('main-player').src = `https://www.youtube.com/embed/${vid}?autoplay=1&modestbranding=1&rel=0`;
-                document.getElementById('player-modal').classList.remove('hidden');
-            } else { window.open(url, '_blank'); }
-        }
-
-        function search() { loadData(document.getElementById('sid').value.toUpperCase()); }
-        function closePlayer() { document.getElementById('player-modal').classList.add('hidden'); document.getElementById('main-player').src = ""; }
         function logout() { localStorage.clear(); location.reload(); }
     </script>
 </body>
