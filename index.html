@@ -3,57 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OpenClass Pro | Secure Learning</title>
-    <!-- Standard Tailwind Play CDN (fine for GitHub Pages pilots) -->
+    <title>OpenClass | Professional Hub</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <style>
         body { background: #050505; color: #fff; font-family: sans-serif; }
-        .glass { background: rgba(18, 18, 18, 0.8); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); }
-        .btn-orange { background: #f97316; transition: all 0.3s; }
-        .btn-orange:hover { background: #ea580c; transform: scale(1.02); }
-        .input-field { background: #111; border: 1px solid #222; padding: 12px; border-radius: 12px; width: 100%; outline: none; color: white; }
+        .glass { background: rgba(20, 20, 20, 0.8); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); }
+        .btn-orange { background: #f97316; transition: all 0.3s; box-shadow: 0 4px 15px rgba(249, 115, 22, 0.2); }
+        .btn-orange:hover { background: #ea580c; transform: translateY(-2px); }
+        .input-field { background: #111; border: 1px solid #222; padding: 14px; border-radius: 12px; width: 100%; outline: none; color: white; }
         .input-field:focus { border-color: #f97316; }
     </style>
 </head>
 <body>
 
-    <div id="auth-container" class="min-h-screen flex items-center justify-center p-6">
-        <div class="w-full max-w-md glass p-8 rounded-[2rem]">
-            <h1 class="text-4xl font-black text-orange-500 text-center mb-8">OpenClass</h1>
-            <div id="auth-form" class="space-y-4">
+    <div id="auth-screen" class="min-h-screen flex items-center justify-center p-6">
+        <div class="w-full max-w-md glass p-10 rounded-[2.5rem]">
+            <h1 class="text-5xl font-black text-orange-500 text-center mb-2 tracking-tighter">OpenClass</h1>
+            <p id="auth-subtitle" class="text-center text-zinc-500 text-xs uppercase tracking-widest mb-8 font-bold">Secure Campus Login</p>
+
+            <div class="space-y-4">
                 <div id="signup-fields" class="hidden space-y-4">
                     <input type="text" id="reg-name" placeholder="Full Name" class="input-field">
-                    <input type="text" id="reg-inst" placeholder="Institute" class="input-field">
+                    <input type="text" id="reg-inst" placeholder="Institute Name" class="input-field">
                     <select id="reg-role" class="input-field">
-                        <option value="STUDENT">Student</option>
-                        <option value="TEACHER">Teacher</option>
+                        <option value="STUDENT">I am a Student</option>
+                        <option value="TEACHER">I am a Teacher</option>
                     </select>
                 </div>
-                <input type="email" id="auth-email" placeholder="Email" class="input-field">
+                <input type="email" id="auth-email" placeholder="Email Address" class="input-field">
                 <input type="password" id="auth-pass" placeholder="Password" class="input-field">
-                <button onclick="handleAuth()" id="primary-btn" class="w-full py-4 btn-orange rounded-xl font-bold uppercase mt-4">Login</button>
-                <p class="text-center text-sm text-zinc-500 mt-6">
-                    <button onclick="toggleAuth()" class="text-orange-500 font-bold">Switch Login / Signup</button>
+                
+                <button onclick="handleAuth()" id="primary-btn" class="w-full py-4 btn-orange rounded-xl font-black uppercase tracking-widest mt-4">Login</button>
+                
+                <p class="text-center text-[10px] text-zinc-600 mt-8 uppercase font-bold tracking-widest">
+                    <button onclick="toggleAuthMode()" class="hover:text-orange-500 transition-colors">Switch to Sign Up / Login</button>
                 </p>
             </div>
         </div>
     </div>
 
     <div id="dashboard" class="hidden min-h-screen flex flex-col">
-        <nav class="p-4 border-b border-zinc-800 glass flex justify-between items-center sticky top-0 z-50">
-            <h2 class="text-xl font-black text-orange-500">OPENCLASS</h2>
-            <button onclick="logout()" class="text-zinc-500 hover:text-red-500 font-bold">LOGOUT</button>
+        <nav class="p-4 border-b border-zinc-900 glass flex justify-between items-center sticky top-0 z-50">
+            <h2 class="text-xl font-black text-orange-500 tracking-tighter">OPENCLASS</h2>
+            <button onclick="logout()" class="text-[10px] font-bold text-zinc-500 hover:text-red-500 uppercase tracking-widest">Logout</button>
         </nav>
-        <main id="content" class="p-6 max-w-4xl mx-auto w-full"></main>
+        <main id="content" class="p-6 max-w-5xl mx-auto w-full"></main>
     </div>
 
     <script>
         const CONFIG = {
-            SHEET_URL: "https://script.google.com/macros/s/AKfycbygAYCprnChBI9MdVX43a9LwxRK2LlK1Esg8Eym42Y3Hm-BrZUOG-hN2fwRiHkiP3i_AQ/exec",
-            EMAILJS_PUB: "P88qoYcr5CHYVNAPw",
-            EMAILJS_SVC: "service_djr1n0f",
-            EMAILJS_TMP: "template_tiqnb53"
+            URL: "https://script.google.com/macros/s/AKfycbygAYCprnChBI9MdVX43a9LwxRK2LlK1Esg8Eym42Y3Hm-BrZUOG-hN2fwRiHkiP3i_AQ/exec",
+            EMAIL_SVC: "service_djr1n0f",
+            EMAIL_TMP: "template_tiqnb53",
+            EMAIL_PUB: "P88qoYcr5CHYVNAPw"
         };
 
         emailjs.init(CONFIG.EMAIL_PUB);
@@ -62,9 +65,10 @@
 
         if(user) renderUI();
 
-        function toggleAuth() {
+        function toggleAuthMode() {
             isSignup = !isSignup;
             document.getElementById('signup-fields').classList.toggle('hidden');
+            document.getElementById('auth-subtitle').innerText = isSignup ? "Create Profile" : "Secure Campus Login";
             document.getElementById('primary-btn').innerText = isSignup ? "Verify & Register" : "Login";
         }
 
@@ -73,14 +77,16 @@
             const pass = document.getElementById('auth-pass').value;
             const btn = document.getElementById('primary-btn');
 
-            if(!email || !pass) return alert("Please fill all fields");
-            btn.disabled = true; btn.innerText = "Connecting...";
+            if(!email || !pass) return alert("Fill all fields");
+            btn.disabled = true; btn.innerText = "Requesting Access...";
 
             try {
                 if(isSignup) {
                     const otp = Math.floor(100000 + Math.random() * 900000);
                     await emailjs.send(CONFIG.EMAIL_SVC, CONFIG.EMAIL_TMP, { to_email: email, otp: otp });
-                    if(prompt("Enter OTP sent to " + email) == otp) {
+                    const userOtp = prompt("OTP sent to " + email);
+                    
+                    if(userOtp == otp) {
                         const payload = { 
                             action: "signup", 
                             payload: { 
@@ -91,14 +97,21 @@
                                 age: 0 
                             }
                         };
-                        // Use text() then parse for Google Script compatibility
-                        const res = await fetch(CONFIG.URL, { method: 'POST', body: JSON.stringify(payload) });
-                        alert("Account ready! Please Login.");
+                        
+                        await fetch(CONFIG.URL, { 
+                            method: 'POST', 
+                            mode: 'no-cors', // Critical for bypass
+                            body: JSON.stringify(payload) 
+                        });
+                        alert("Account Authorized! Now please login.");
                         location.reload();
                     }
                 } else {
-                    const res = await fetch(CONFIG.URL, { method: 'POST', body: JSON.stringify({ action: "login", payload: { email, password: pass }}) });
-                    const data = await res.json();
+                    const response = await fetch(CONFIG.URL, { 
+                        method: 'POST', 
+                        body: JSON.stringify({ action: "login", payload: { email, password: pass }}) 
+                    });
+                    const data = await response.json();
                     if(data.email) {
                         localStorage.setItem('oc_user', JSON.stringify(data));
                         user = data;
@@ -107,20 +120,35 @@
                 }
             } catch(e) {
                 console.error(e);
-                alert("Server Connection Error. Check if your Script URL is correct and deployed as 'Anyone'.");
+                alert("Server Connection Error. Check your Script URL and Deployment.");
+            } finally {
+                btn.disabled = false;
+                btn.innerText = isSignup ? "Verify & Register" : "Login";
             }
-            btn.disabled = false; btn.innerText = isSignup ? "Register" : "Login";
         }
 
         function renderUI() {
-            document.getElementById('auth-container').classList.add('hidden');
+            document.getElementById('auth-screen').style.display = 'none';
             document.getElementById('dashboard').classList.remove('hidden');
             const main = document.getElementById('content');
             
             if(user.role === 'TEACHER') {
-                main.innerHTML = `<div class="p-8 glass rounded-3xl"><h2 class="text-4xl font-black">${user.teacherId}</h2><p class="text-zinc-500">Teacher Dashboard Ready</p></div>`;
+                main.innerHTML = `
+                    <div class="space-y-6">
+                        <div class="p-10 glass rounded-[2.5rem] border-orange-500/20">
+                            <p class="text-orange-500 font-bold text-xs uppercase tracking-widest mb-2">Teacher ID</p>
+                            <h2 class="text-5xl font-black">${user.teacherId}</h2>
+                        </div>
+                        <p class="text-zinc-500 text-center font-bold uppercase text-[10px] tracking-widest">Dashboard Active</p>
+                    </div>
+                `;
             } else {
-                main.innerHTML = `<div class="p-8 glass rounded-3xl"><h2 class="text-4xl font-black">Welcome, Student</h2><p class="text-zinc-500">Use the search bar to find teachers.</p></div>`;
+                main.innerHTML = `
+                    <div class="p-10 glass rounded-[2.5rem] border-blue-500/20 text-center">
+                        <h2 class="text-4xl font-black mb-2">Welcome, ${user.name}</h2>
+                        <p class="text-zinc-500 uppercase tracking-widest text-[10px]">Student Access Granted</p>
+                    </div>
+                `;
             }
         }
 
