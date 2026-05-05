@@ -9,66 +9,57 @@
     <style>
         body { background: #050505; color: #fff; font-family: sans-serif; }
         .glass { background: rgba(18, 18, 18, 0.8); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); }
-        .btn-orange { background: #f97316; transition: all 0.3s; }
-        .btn-orange:hover { background: #ea580c; transform: translateY(-1px); }
+        .btn-orange { background: #f97316; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; transition: 0.3s; }
+        .btn-orange:hover { background: #ea580c; transform: translateY(-2px); }
         .input-field { background: #111; border: 1px solid #222; padding: 14px; border-radius: 12px; width: 100%; outline: none; color: white; }
         .input-field:focus { border-color: #f97316; }
-        .no-select { user-select: none; -webkit-user-select: none; }
     </style>
 </head>
-<body class="no-select">
+<body>
 
     <div id="auth-screen" class="min-h-screen flex items-center justify-center p-6">
         <div class="w-full max-w-md glass p-10 rounded-[2.5rem]">
-            <h1 class="text-5xl font-black text-orange-500 text-center mb-2 tracking-tighter">OpenClass</h1>
-            <p id="auth-subtitle" class="text-center text-zinc-500 text-[10px] uppercase tracking-widest mb-8 font-bold">Secure Campus Login</p>
-
+            <h1 class="text-5xl font-black text-orange-500 text-center mb-8 tracking-tighter">OpenClass</h1>
+            
+            <div id="signup-fields" class="hidden space-y-4 mb-4">
+                <input type="text" id="reg-name" placeholder="Full Name" class="input-field">
+                <input type="text" id="reg-inst" placeholder="Institute" class="input-field">
+                <select id="reg-role" class="input-field">
+                    <option value="STUDENT">Student</option>
+                    <option value="TEACHER">Teacher</option>
+                </select>
+            </div>
+            
             <div class="space-y-4">
-                <div id="signup-fields" class="hidden space-y-4">
-                    <input type="text" id="reg-name" placeholder="Full Name" class="input-field">
-                    <input type="text" id="reg-inst" placeholder="Institute" class="input-field">
-                    <select id="reg-role" class="input-field">
-                        <option value="STUDENT">Student Account</option>
-                        <option value="TEACHER">Teacher Account</option>
-                    </select>
-                </div>
-                <input type="email" id="auth-email" placeholder="Email" class="input-field">
+                <input type="email" id="auth-email" placeholder="Email Address" class="input-field">
                 <input type="password" id="auth-pass" placeholder="Password" class="input-field">
-                <button onclick="handleAuth()" id="primary-btn" class="w-full py-4 btn-orange rounded-xl font-bold uppercase tracking-widest mt-4">Login</button>
-                <p class="text-center text-[10px] text-zinc-600 mt-8 uppercase font-bold tracking-widest">
-                    <button onclick="toggleAuthMode()" class="hover:text-orange-500 transition-colors">Switch Mode</button>
-                </p>
+                <button onclick="handleAuth()" id="primary-btn" class="w-full py-5 btn-orange rounded-xl">Login</button>
+                <button onclick="toggleMode()" class="w-full text-[10px] text-zinc-600 font-bold tracking-widest mt-4">Switch Sign In / Signup</button>
             </div>
         </div>
     </div>
 
-    <!-- DASHBOARD -->
+    <!-- CUSTOM OTP MODAL -->
+    <div id="otp-modal" class="hidden fixed inset-0 z-[100] bg-black/95 backdrop-blur-md flex items-center justify-center p-6">
+        <div class="w-full max-w-sm glass p-10 rounded-[2.5rem] text-center border-orange-500/20">
+            <h3 class="text-2xl font-bold mb-2">Verify OTP</h3>
+            <p class="text-zinc-500 text-sm mb-8">Check your email for the verification code.</p>
+            <input type="number" id="otp-input" placeholder="000000" class="input-field text-center text-3xl font-black mb-8">
+            <button onclick="verifyOtp()" class="w-full py-4 btn-orange rounded-xl">Verify & Sign Up</button>
+        </div>
+    </div>
+
     <div id="dashboard" class="hidden min-h-screen flex flex-col">
         <nav class="p-4 border-b border-zinc-900 glass flex justify-between items-center sticky top-0 z-50">
-            <h2 class="text-xl font-black text-orange-500 tracking-tighter uppercase">OpenClass</h2>
-            <div class="flex items-center gap-4">
-                <div class="text-right">
-                    <p id="nav-name" class="text-xs font-bold"></p>
-                    <p id="nav-id" class="text-[10px] text-zinc-600"></p>
-                </div>
-                <button onclick="logout()" class="p-2 bg-zinc-900 rounded-full text-zinc-500">✕</button>
-            </div>
+            <h2 class="text-xl font-black text-orange-500">OPENCLASS</h2>
+            <button onclick="logout()" class="text-xs font-bold text-zinc-500 uppercase tracking-widest">Logout</button>
         </nav>
-        <main id="main-content" class="p-6 max-w-5xl mx-auto w-full"></main>
-    </div>
-
-    <!-- OTP MODAL -->
-    <div id="otp-modal" class="hidden fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-6">
-        <div class="w-full max-w-sm glass p-10 rounded-[2rem] text-center">
-            <h3 class="text-2xl font-bold mb-2">Verify Email</h3>
-            <input type="number" id="otp-input" placeholder="000000" class="input-field text-center text-3xl font-black mb-6">
-            <button id="verify-btn" onclick="verifyOtp()" class="w-full py-4 btn-orange rounded-xl font-bold uppercase">Verify & Register</button>
-        </div>
+        <main id="dash-content" class="p-6 max-w-5xl mx-auto"></main>
     </div>
 
     <script>
         const CONFIG = {
-            URL: "https://script.google.com/macros/s/AKfycbxt7ZZcluRcgC0A2DtMHyf6s1myyQSNo6lt9C-LtqRTFv76yGCXVGwcflGAL3BZJeIYNg/exec", // IMPORTANT: NEW DEPLOYMENT URL
+            URL: "https://script.google.com/macros/s/AKfycbyhaf1mKBQQ5bX_lVjLNemQZQC5_Hy7ZF6rx0tE2g78bVwNlgzfguUSC9ruwGGl0LvvSg/exec", // IMPORTANT: REDEPLOY AND GET A NEW URL
             EMAIL_SVC: "service_djr1n0f",
             EMAIL_TMP: "template_tiqnb53",
             EMAIL_PUB: "P88qoYcr5CHYVNAPw"
@@ -76,93 +67,77 @@
 
         emailjs.init(CONFIG.EMAIL_PUB);
         let user = JSON.parse(localStorage.getItem('oc_user'));
-        let isSignup = false;
-        let generatedOtp = null;
-        let pendingPayload = null;
+        let isSignup = false, generatedOtp, pendingPayload;
 
         if(user) renderDashboard();
 
-        function toggleAuthMode() {
+        function toggleMode() {
             isSignup = !isSignup;
             document.getElementById('signup-fields').classList.toggle('hidden');
-            document.getElementById('primary-btn').innerText = isSignup ? "Send Code" : "Login";
+            document.getElementById('primary-btn').innerText = isSignup ? "Verify Email" : "Login";
         }
 
-        async function apiRequest(data) {
-            console.log("Sending request:", data.action);
+        async function secureFetch(data) {
             try {
+                // Using text/plain is the magic bullet to bypass complex CORS checks
                 const response = await fetch(CONFIG.URL, {
                     method: 'POST',
-                    body: JSON.stringify(data),
-                    mode: 'cors' // Ensure CORS is enabled
+                    mode: 'cors',
+                    body: JSON.stringify(data)
                 });
-                const result = await response.json();
-                console.log("Response received:", result);
-                return result;
+                return await response.json();
             } catch (err) {
-                console.error("API Error:", err);
-                alert("Connection Error. Is your Script URL correct?");
-                return null;
+                console.error("CORS/Connection Error:", err);
+                return "Connection Error. Ensure Script is deployed as 'Anyone'.";
             }
         }
 
         async function handleAuth() {
-            const email = document.getElementById('auth-email').value.trim();
+            const email = document.getElementById('auth-email').value;
             const pass = document.getElementById('auth-pass').value;
             const btn = document.getElementById('primary-btn');
 
-            if(!email || !pass) return alert("Fill all fields");
-            btn.disabled = true;
-            btn.innerText = "Processing...";
-
             if(isSignup) {
+                btn.innerText = "Sending Code...";
                 generatedOtp = Math.floor(100000 + Math.random() * 900000);
-                pendingPayload = { 
-                    action: "signup", 
-                    payload: { 
-                        email, password: pass, 
-                        name: document.getElementById('reg-name').value, 
-                        role: document.getElementById('reg-role').value,
-                        institute: document.getElementById('reg-inst').value 
-                    }
+                pendingPayload = {
+                    action: "signup",
+                    payload: { email, password: pass, name: document.getElementById('reg-name').value, role: document.getElementById('reg-role').value, institute: document.getElementById('reg-inst').value }
                 };
                 await emailjs.send(CONFIG.EMAIL_SVC, CONFIG.EMAIL_TMP, { to_email: email, otp: generatedOtp });
                 document.getElementById('otp-modal').classList.remove('hidden');
-                btn.disabled = false;
-                btn.innerText = "Send Code";
+                btn.innerText = "Verify Email";
             } else {
-                const data = await apiRequest({ action: "login", payload: { email, password: pass }});
-                if(data && data.email) {
-                    localStorage.setItem('oc_user', JSON.stringify(data));
-                    user = data;
+                btn.innerText = "Authorizing...";
+                const res = await secureFetch({ action: "login", payload: { email, password: pass }});
+                if(res && res.email) {
+                    localStorage.setItem('oc_user', JSON.stringify(res));
+                    user = res;
                     renderDashboard();
-                } else {
-                    alert(data || "Login failed");
-                }
-                btn.disabled = false;
+                } else { alert(res || "Login failed"); }
                 btn.innerText = "Login";
             }
         }
 
         async function verifyOtp() {
-            const val = document.getElementById('otp-input').value;
-            if(val == generatedOtp) {
-                const result = await apiRequest(pendingPayload);
-                if(result === "Success") {
-                    alert("Account Created! Please login.");
+            if(document.getElementById('otp-input').value == generatedOtp) {
+                const res = await secureFetch(pendingPayload);
+                if(res === "Success") {
+                    alert("Account Verified! Please login.");
                     location.reload();
-                } else { alert(result); }
-            } else { alert("Invalid OTP"); }
+                } else { alert(res); }
+            } else { alert("Wrong OTP code."); }
         }
 
         function renderDashboard() {
             document.getElementById('auth-screen').style.display = 'none';
             document.getElementById('dashboard').classList.remove('hidden');
-            document.getElementById('nav-name').innerText = user.name;
-            document.getElementById('nav-id').innerText = user.teacherId || "Student";
-            
-            const main = document.getElementById('main-content');
-            main.innerHTML = `<h2 class='text-2xl font-bold'>Welcome to ${user.role} Dashboard</h2>`;
+            document.getElementById('dash-content').innerHTML = `
+                <div class="glass p-10 rounded-[2.5rem] border-orange-500/20">
+                    <h2 class="text-4xl font-black mb-2 uppercase tracking-tighter">Welcome, ${user.name}</h2>
+                    <p class="text-zinc-500 text-xs font-bold uppercase tracking-widest">${user.role} Account • Verified Access</p>
+                </div>
+            `;
         }
 
         function logout() { localStorage.clear(); location.reload(); }
