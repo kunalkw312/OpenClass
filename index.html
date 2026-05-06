@@ -18,8 +18,8 @@
                         offWhite: '#fdfbf7',
                     },
                     boxShadow: {
-                        'soft': '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
-                        'brand': '0 20px 30px -10px rgba(247, 148, 29, 0.3)',
+                        'soft': '0 10px 25px -5px rgba(0, 0, 0, 0.1)',
+                        'brand': '0 15px 30px -10px rgba(247, 148, 29, 0.4)',
                     }
                 }
             }
@@ -32,51 +32,40 @@
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg-main); color: var(--text-main); transition: background-color 0.4s ease; overflow-x: hidden; }
         .glass { background: var(--glass-bg); backdrop-filter: blur(25px); border: 1px solid rgba(128,128,128,0.15); box-shadow: var(--tw-shadow-soft); }
         
-        .btn-brand { 
-            background: linear-gradient(135deg, #004a80 0%, #f7941d 100%);
-            background-size: 200% auto;
-            transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .btn-brand:hover { background-position: right center; transform: translateY(-2px); }
+        .btn-brand { background: linear-gradient(135deg, #004a80 0%, #f7941d 100%); background-size: 200% auto; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        .btn-brand:hover { background-position: right center; transform: translateY(-1px); }
 
-        .spinner-small { 
-            width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.3); 
-            border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; 
-        }
+        .spinner-small { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
-        /* Input separation fixes */
-        .input-field { 
-            background: var(--input-bg); 
-            border: 1px solid rgba(128,128,128,0.25); 
-            color: var(--text-main);
-            box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.05);
-            transition: border-color 0.3s, box-shadow 0.3s;
-        }
+        .input-field { background: var(--input-bg); border: 1px solid rgba(128,128,128,0.25); color: var(--text-main); }
         .input-field:focus { border-color: #f7941d; box-shadow: 0 0 0 4px rgba(247, 148, 29, 0.1); }
 
-        /* Skeleton Loading */
-        .skeleton { background: linear-gradient(90deg, rgba(128,128,128,0.1) 25%, rgba(128,128,128,0.2) 50%, rgba(128,128,128,0.1) 75%); background-size: 200% 100%; animation: loading 1.5s infinite; }
+        .skeleton { background: linear-gradient(90deg, rgba(128,128,128,0.05) 25%, rgba(128,128,128,0.1) 50%, rgba(128,128,128,0.05) 75%); background-size: 200% 100%; animation: loading 1.5s infinite; }
         @keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+        /* Minimal Toast Styling */
+        #toast-box { pointer-events: none; }
+        .toast-pill { pointer-events: auto; animation: slideUp 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards; }
+        @keyframes slideUp { from { transform: translateY(100px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
     </style>
 </head>
 <body class="selection:bg-brandOrange/30">
 
-    <div id="toast-box" class="fixed top-4 right-4 z-[600] flex flex-col gap-3"></div>
+    <!-- Minimal Bottom Center Toasts -->
+    <div id="toast-box" class="fixed bottom-8 left-1/2 -translate-x-1/2 z-[600] flex flex-col items-center gap-2 w-full max-w-xs"></div>
 
-    <!-- Smart Inline Loader -->
     <div id="global-loader" class="hidden fixed top-0 left-0 w-full h-1 z-[550] bg-brandOrange/20 overflow-hidden">
         <div class="h-full bg-brandOrange skeleton"></div>
     </div>
 
-    <!-- Media Vault -->
     <div id="media-vault" class="hidden fixed inset-0 z-[500] bg-black flex flex-col">
         <nav class="p-4 glass border-b border-white/5 flex justify-between items-center px-6">
             <div class="flex items-center gap-3">
                 <img src="https://res.cloudinary.com/dowhvdkjh/image/upload/v1777895769/IMG-20260504-WA0002_fucbjd.jpg" class="h-8 rounded" alt="Logo">
                 <h3 id="vault-title" class="font-black text-xs uppercase italic"><span class="text-offWhite">Open</span><span class="text-brandOrange">Class</span></h3>
             </div>
-            <button onclick="closeVault()" class="bg-brandBlue text-white px-5 py-2 rounded-xl text-[10px] font-black uppercase shadow-lg">Close (ESC)</button>
+            <button onclick="closeVault()" class="bg-brandBlue text-white px-5 py-2 rounded-xl text-[10px] font-black uppercase">Close (ESC)</button>
         </nav>
         <div class="flex-grow flex items-center justify-center p-2 bg-zinc-900">
             <iframe id="vault-frame" class="w-full aspect-video md:h-full max-w-6xl rounded-2xl shadow-2xl bg-black" allowfullscreen></iframe>
@@ -92,7 +81,7 @@
                     <span class="dark:text-white light:text-brandBlue">Open</span><span class="text-brandOrange">Class</span>
                 </h1>
                 
-                <div id="signup-fields" class="hidden space-y-4 mb-4">
+                <div id="signup-fields" class="hidden space-y-4 mb-4 text-left">
                     <input type="text" id="reg-name" placeholder="Full Name" class="input-field w-full p-4 rounded-xl outline-none">
                     <select id="reg-role" class="input-field w-full p-4 rounded-xl outline-none">
                         <option value="STUDENT">Student Account</option>
@@ -104,7 +93,7 @@
                     <input type="email" id="auth-email" placeholder="Campus Email" class="input-field w-full p-4 rounded-xl outline-none">
                     <div class="relative">
                         <input type="password" id="auth-pass" placeholder="Password" class="input-field w-full p-4 rounded-xl outline-none">
-                        <button onclick="togglePassword('auth-pass')" class="absolute right-4 top-4 text-zinc-500 text-[9px] font-black uppercase tracking-widest hover:text-brandOrange">Show</button>
+                        <button onclick="togglePassword('auth-pass')" class="absolute right-4 top-4 text-zinc-500 text-[9px] font-black uppercase tracking-widest">Show</button>
                     </div>
                     <button onclick="handleAuth()" id="primary-btn" class="w-full py-4 btn-brand text-white rounded-2xl font-black uppercase tracking-widest shadow-brand">Sign In</button>
                     <button onclick="toggleAuthMode()" id="toggle-auth-btn" class="w-full text-[10px] text-zinc-500 font-bold uppercase mt-4 hover:text-brandOrange transition-all">Create Campus Account</button>
@@ -134,7 +123,7 @@
 
                 <div class="flex items-center gap-6">
                     <button onclick="toggleDarkMode()" class="p-2 glass rounded-full hover:scale-110 transition-transform">🌓</button>
-                    <button onclick="logout()" class="text-[10px] font-black text-red-500 uppercase tracking-widest hover:text-red-400">Logout</button>
+                    <button onclick="logout()" class="text-[10px] font-black text-red-500 uppercase tracking-widest">Logout</button>
                 </div>
             </nav>
             <main id="main-content" class="p-6 max-w-7xl mx-auto w-full flex-grow"></main>
@@ -162,7 +151,6 @@
         emailjs.init(CONFIG.EMAIL_PUB);
         let user = JSON.parse(localStorage.getItem('oc_user')), isSignup = false, genOtp, pending;
 
-        // Initialize Theme Persistence
         function initTheme() {
             const savedTheme = localStorage.getItem('oc_theme') || 'dark';
             document.documentElement.className = savedTheme;
@@ -170,34 +158,32 @@
         initTheme();
 
         function toggleDarkMode() {
-            const current = document.documentElement.className;
-            const target = current === 'dark' ? 'light' : 'dark';
+            const target = document.documentElement.className === 'dark' ? 'light' : 'dark';
             document.documentElement.className = target;
             localStorage.setItem('oc_theme', target);
         }
 
-        // --- Fast UI Logic ---
+        function toast(msg, type="success") {
+            const b = document.getElementById('toast-box');
+            const d = document.createElement('div');
+            // Small, bare "pill" toast
+            d.className = `toast-pill glass px-5 py-2.5 rounded-full border border-white/10 text-[10px] font-black uppercase tracking-widest shadow-xl flex items-center gap-2 ${type==='success'?'text-brandOrange':'text-red-500'}`;
+            d.innerHTML = `<span>${type==='success'?'✔':'✖'}</span> ${msg}`;
+            b.appendChild(d);
+            setTimeout(() => { d.style.opacity = '0'; d.style.transform = 'translateY(10px)'; setTimeout(() => d.remove(), 400) }, 3000);
+        }
 
         async function handleSubToggle(btn, tId, isSubbed) {
-            // Instant visual feedback without blocking
-            const originalHTML = btn.innerHTML;
             btn.disabled = true;
+            const originalHTML = btn.innerHTML;
             btn.innerHTML = `<div class="spinner-small mx-auto"></div>`;
-            
             const action = isSubbed ? "unsubscribe" : "subscribe";
             const res = await api(action, { studentEmail: user.email, teacherId: tId });
-            
             if(res === "Subscribed" || res === "Unsubscribed") {
-                toast(isSubbed ? "Frequency Severed" : "Connection Established");
-                btn.innerHTML = isSubbed ? "Subscribe" : "Unsubscribe";
-                btn.classList.toggle('btn-brand');
-                btn.classList.toggle('bg-zinc-700');
-                // Refresh data in background
-                if(document.getElementById('search-results').classList.contains('hidden') === false) {
-                    executeSearch(true); // Silent search update
-                }
+                toast(isSubbed ? "Unfollowed" : "Followed");
+                executeSearch(true);
             } else {
-                toast("Signal Interference", "error");
+                toast("Error", "error");
                 btn.innerHTML = originalHTML;
             }
             btn.disabled = false;
@@ -206,28 +192,17 @@
         async function executeSearch(silent = false) {
             const q = document.getElementById('g-search').value;
             if(!q) return;
-            
             const main = document.getElementById('main-content');
             if(!silent) {
-                // Show search skeleton immediately
-                main.innerHTML = `
-                    <div class="space-y-8">
-                        <div class="skeleton h-32 rounded-[3rem]"></div>
-                        <div class="space-y-4">
-                            <div class="skeleton h-16 rounded-2xl w-1/3"></div>
-                            ${Array(4).fill('<div class="skeleton h-20 rounded-2xl"></div>').join('')}
-                        </div>
-                    </div>`;
+                main.innerHTML = `<div class="space-y-8"><div class="skeleton h-32 rounded-[3rem]"></div><div class="space-y-4"><div class="skeleton h-16 rounded-2xl w-1/3"></div>${Array(4).fill('<div class="skeleton h-20 rounded-2xl"></div>').join('')}</div></div>`;
             }
-
             const data = await api("search", { email: user.email }, q);
             renderSearchResults(data);
         }
 
         function renderSearchResults(data) {
             const main = document.getElementById('main-content');
-            if(!data.length) { main.innerHTML = `<div class="text-center py-20 uppercase font-black opacity-20 tracking-widest">Sector Empty</div>`; return; }
-            
+            if(!data.length) { main.innerHTML = `<div class="text-center py-20 uppercase font-black opacity-20 tracking-widest">No Results</div>`; return; }
             const top = data[0];
             main.innerHTML = `
                 <div class="space-y-10 animate-in fade-in duration-500">
@@ -236,7 +211,7 @@
                             <div class="w-16 h-16 btn-brand rounded-2xl flex items-center justify-center text-white text-3xl font-black shadow-lg">${top.name[0]}</div>
                             <div>
                                 <h2 class="text-2xl font-black italic tracking-tighter">${top.name}</h2>
-                                <p class="text-[10px] opacity-60 uppercase font-bold tracking-[0.3em]">${top.id} • ${top.postCount} Active Archives</p>
+                                <p class="text-[10px] opacity-60 uppercase font-bold tracking-[0.3em]">${top.id} • ${top.postCount} Resources</p>
                             </div>
                         </div>
                         <button onclick="handleSubToggle(this, '${top.id}', ${top.isSubscribed})" class="px-10 py-3 min-w-[140px] ${top.isSubscribed ? 'bg-zinc-700 text-white' : 'btn-brand text-white'} rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-xl">
@@ -244,24 +219,25 @@
                         </button>
                     </div>
                     <div class="grid gap-4">
-                        <h3 class="text-[10px] font-black uppercase opacity-40 ml-6 tracking-[0.4em]">Related Resources</h3>
+                        <h3 class="text-[10px] font-black uppercase opacity-40 ml-6 tracking-[0.4em]">Instructor Resources</h3>
                         ${data.flatMap(t => t.posts).map(p => `
-                            <div class="glass p-6 rounded-3xl flex justify-between items-center group hover:border-brandOrange/40 transition-all border-transparent">
-                                <div class="flex items-center gap-4">
+                            <div class="glass p-6 rounded-3xl flex flex-col md:flex-row justify-between items-center group hover:border-brandOrange/40 transition-all border-transparent gap-4">
+                                <div class="flex items-center gap-4 w-full md:w-auto">
                                     <div class="w-10 h-10 bg-brandBlue/10 rounded-xl flex items-center justify-center text-brandBlue">${p.type==='VIDEO'?'🎬':'📄'}</div>
                                     <div>
                                         <p class="font-bold text-sm tracking-tight">${p.title}</p>
-                                        <p class="text-[9px] opacity-40 uppercase font-bold tracking-widest">Source: ${top.name}</p>
+                                        <p class="text-[8px] opacity-40 uppercase font-bold tracking-widest">Instructor: ${top.name} (${top.id}) • Published: ${new Date().toLocaleDateString()}</p>
                                     </div>
                                 </div>
-                                <button onclick="openResource('${p.id}','${p.url}','${p.type}','${p.title}')" class="bg-brandOrange/10 text-brandOrange px-8 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-brandOrange hover:text-white transition-all shadow-md">Access</button>
+                                <div class="flex items-center gap-6 w-full md:w-auto justify-between md:justify-end">
+                                    <p class="text-[9px] font-bold uppercase opacity-40">${p.views || 0} Views</p>
+                                    <button onclick="openResource('${p.id}','${p.url}','${p.type}','${p.title}')" class="bg-brandOrange/10 text-brandOrange px-8 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-brandOrange hover:text-white transition-all shadow-md">Open</button>
+                                </div>
                             </div>
                         `).join('')}
                     </div>
                 </div>`;
         }
-
-        // --- Standard Logic (with loader/auth updates) ---
 
         async function verifyOtp() {
             if(document.getElementById('otp-input').value == genOtp) {
@@ -270,13 +246,10 @@
                 if(res === "Success") {
                     const loginRes = await api("login", { email: pending.email, password: pending.password });
                     localStorage.setItem('oc_user', JSON.stringify(loginRes));
-                    user = loginRes;
-                    renderDashboard();
-                    toast("Direct Link Established");
+                    user = loginRes; renderDashboard(); toast("Verification Success");
                 }
-                toggleLoader(false);
-                closeOtp();
-            } else toast("Code Corrupted", "error");
+                toggleLoader(false); closeOtp();
+            } else toast("Wrong Code", "error");
         }
 
         async function api(a, p={}, q="") {
@@ -284,25 +257,80 @@
             return await r.json();
         }
 
-        function toast(msg, type="success") {
-            const b = document.getElementById('toast-box');
-            const d = document.createElement('div');
-            d.className = `glass px-6 py-4 rounded-2xl border-l-4 ${type==='success'?'border-brandOrange':'border-red-500'} text-[10px] font-black uppercase tracking-widest shadow-2xl transition-all duration-500 translate-x-full`;
-            d.innerText = msg; b.appendChild(d);
-            requestAnimationFrame(() => d.classList.remove('translate-x-full'));
-            setTimeout(() => { d.classList.add('translate-x-full'); setTimeout(() => d.remove(), 500); }, 3500);
-        }
-
         function toggleLoader(s) { document.getElementById('global-loader').classList[s?'remove':'add']('hidden'); }
         function togglePassword(id) { const el = document.getElementById(id); el.type = el.type === 'password' ? 'text' : 'password'; }
         function closeOtp() { document.getElementById('otp-modal').classList.add('hidden'); }
         function closeVault() { document.getElementById('media-vault').classList.add('hidden'); document.getElementById('vault-frame').src=""; }
         function toggleAuthMode() { isSignup = !isSignup; document.getElementById('signup-fields').classList.toggle('hidden'); document.getElementById('primary-btn').innerText = isSignup ? "Verify" : "Sign In"; document.getElementById('toggle-auth-btn').innerText = isSignup ? "Return to Login" : "Initialize Account"; }
-        async function handleAuth() { const e = document.getElementById('auth-email').value; const p = document.getElementById('auth-pass').value; if(!e || !p) return toast("Input Required", "error"); if(isSignup) { toggleLoader(true); genOtp = Math.floor(100000 + Math.random() * 900000); pending = { email: e, password: p, name: document.getElementById('reg-name').value, role: document.getElementById('reg-role').value }; await emailjs.send(CONFIG.EMAIL_SVC, CONFIG.EMAIL_TMP, { to_email: e, otp: genOtp }); document.getElementById('otp-modal').classList.remove('hidden'); toggleLoader(false); } else { toggleLoader(true); const res = await api("login", { email: e, password: p }); if(res.email) { localStorage.setItem('oc_user', JSON.stringify(res)); user = res; renderDashboard(); } else toast(res, "error"); toggleLoader(false); } }
+        
+        async function handleAuth() { 
+            const e = document.getElementById('auth-email').value; 
+            const p = document.getElementById('auth-pass').value; 
+            if(!e || !p) return toast("Input Required", "error"); 
+            if(isSignup) { 
+                toggleLoader(true); genOtp = Math.floor(100000 + Math.random() * 900000); 
+                pending = { email: e, password: p, name: document.getElementById('reg-name').value, role: document.getElementById('reg-role').value }; 
+                await emailjs.send(CONFIG.EMAIL_SVC, CONFIG.EMAIL_TMP, { to_email: e, otp: genOtp }); 
+                document.getElementById('otp-modal').classList.remove('hidden'); toggleLoader(false); 
+            } else { 
+                toggleLoader(true); const res = await api("login", { email: e, password: p }); 
+                if(res.email) { localStorage.setItem('oc_user', JSON.stringify(res)); user = res; renderDashboard(); } else toast(res, "error"); 
+                toggleLoader(false); 
+            } 
+        }
+
         function renderDashboard() { document.getElementById('auth-screen').style.display = 'none'; document.getElementById('dashboard').classList.remove('hidden'); loadHome(); }
-        async function loadHome() { const main = document.getElementById('main-content'); toggleLoader(true); if(user.role === 'TEACHER') { main.innerHTML = `<div class="grid lg:grid-cols-3 gap-10"><div class="glass p-8 rounded-[3rem] h-fit lg:sticky lg:top-28"><h3 class="text-brandOrange font-black text-[10px] uppercase mb-6 tracking-widest italic">New Upload</h3><input id="up-title" placeholder="Title" class="input-field mb-3 w-full p-3 rounded-xl outline-none"><input id="up-url" placeholder="URL" class="input-field mb-3 w-full p-3 rounded-xl outline-none"><select id="up-type" class="input-field mb-6 w-full p-3 rounded-xl outline-none"><option value="VIDEO">Video</option><option value="FILE">Document</option></select><button onclick="publish()" class="w-full py-4 btn-brand text-white rounded-xl font-bold text-xs uppercase tracking-widest">Publish</button></div><div id="feed" class="lg:col-span-2 space-y-4"></div></div>`; const data = await api("search", { email: user.email }, user.teacherId); renderFeed(data[0]?.posts || [], true); } else { main.innerHTML = `<div id="feed" class="max-w-2xl mx-auto space-y-4"></div>`; const data = await api("get_subscribed_feed", { email: user.email }); renderFeed(data, false); } toggleLoader(false); }
-        function renderFeed(data, isT) { const f = document.getElementById('feed'); if(!data.length) { f.innerHTML = `<p class="text-center py-20 opacity-40 uppercase text-[10px] font-black tracking-widest">No activity found</p>`; return; } f.innerHTML = data.map(i => `<div class="glass p-6 rounded-[2.5rem] flex justify-between items-center group hover:border-brandOrange/20 transition-all"><div class="flex items-center gap-6"><div class="w-12 h-12 bg-brandBlue/10 rounded-2xl flex items-center justify-center">${i.type==='VIDEO'?'🎬':'📄'}</div><div><p class="text-[9px] text-brandOrange font-black uppercase tracking-widest">${i.type}</p><h4 class="font-bold text-lg italic tracking-tight">${i.title}</h4></div></div><button onclick="openResource('${i.id}','${i.url}','${i.type}','${i.title}')" class="bg-brandOrange text-white px-8 py-3 rounded-2xl text-[10px] font-black uppercase">Open</button></div>`).join(''); }
-        function openResource(id, url, type, title) { document.getElementById('vault-title').innerText = title.toUpperCase(); let src = url; if(type === 'VIDEO') { let vid = url.includes('v=') ? url.split('v=')[1].split('&')[0] : url.split('/').pop(); src = `https://www.youtube.com/embed/${vid}?autoplay=1&modestbranding=1&rel=0`; } else if(url.includes('drive.google.com')) src = url.replace('/view', '/preview'); document.getElementById('vault-frame').src = src; document.getElementById('media-vault').classList.remove('hidden'); }
+        
+        async function loadHome() { 
+            const main = document.getElementById('main-content'); 
+            toggleLoader(true); 
+            if(user.role === 'TEACHER') { 
+                main.innerHTML = `<div class="grid lg:grid-cols-3 gap-10"><div class="glass p-8 rounded-[3rem] h-fit lg:sticky lg:top-28"><h3 class="text-brandOrange font-black text-[10px] uppercase mb-6 tracking-widest italic">Publish</h3><input id="up-title" placeholder="Title" class="input-field mb-3 w-full p-3 rounded-xl outline-none"><input id="up-url" placeholder="URL" class="input-field mb-3 w-full p-3 rounded-xl outline-none"><select id="up-type" class="input-field mb-6 w-full p-3 rounded-xl outline-none"><option value="VIDEO">Video</option><option value="FILE">Document</option></select><button onclick="publish()" class="w-full py-4 btn-brand text-white rounded-xl font-bold text-xs uppercase tracking-widest">Publish</button></div><div id="feed" class="lg:col-span-2 space-y-4"></div></div>`; 
+                const data = await api("search", { email: user.email }, user.teacherId); 
+                renderFeed(data[0]?.posts || [], true, data[0]); 
+            } else { 
+                main.innerHTML = `<div id="feed" class="max-w-2xl mx-auto space-y-4"></div>`; 
+                const data = await api("get_subscribed_feed", { email: user.email }); 
+                renderFeed(data, false); 
+            } 
+            toggleLoader(false); 
+        }
+
+        function renderFeed(data, isT, tInfo) { 
+            const f = document.getElementById('feed'); 
+            if(!data.length) { f.innerHTML = `<p class="text-center py-20 opacity-40 uppercase text-[10px] font-black tracking-widest">No Content</p>`; return; } 
+            f.innerHTML = data.map(i => `
+                <div class="glass p-6 rounded-[2.5rem] flex flex-col md:flex-row justify-between items-center group border border-transparent hover:border-brandOrange/20 transition-all gap-4 shadow-soft">
+                    <div class="flex items-center gap-6 w-full md:w-auto">
+                        <div class="w-12 h-12 bg-brandBlue/10 rounded-2xl flex items-center justify-center">${i.type==='VIDEO'?'🎬':'📄'}</div>
+                        <div>
+                            <p class="text-[9px] text-brandOrange font-black uppercase tracking-widest">${i.type}</p>
+                            <h4 class="font-bold text-lg italic tracking-tight">${i.title}</h4>
+                            <p class="text-[8px] opacity-40 uppercase font-black">${i.tName || tInfo?.name || 'Instructor'} • ${i.views || 0} Views</p>
+                        </div>
+                    </div>
+                    <button onclick="openResource('${i.id}','${i.url}','${i.type}','${i.title}')" class="bg-brandOrange text-white px-8 py-3 rounded-2xl text-[10px] font-black uppercase w-full md:w-auto shadow-brand">Open</button>
+                </div>`).join(''); 
+        }
+
+        async function openResource(id, url, type, title) { 
+            document.getElementById('vault-title').innerText = title.toUpperCase(); 
+            let src = url; 
+            if(type === 'VIDEO') { let vid = url.includes('v=') ? url.split('v=')[1].split('&')[0] : url.split('/').pop(); src = `https://www.youtube.com/embed/${vid}?autoplay=1&modestbranding=1&rel=0`; } 
+            else if(url.includes('drive.google.com')) src = url.replace('/view', '/preview'); 
+            document.getElementById('vault-frame').src = src; 
+            document.getElementById('media-vault').classList.remove('hidden'); 
+        }
+
+        async function publish() { 
+            const t = document.getElementById('up-title').value; 
+            const u = document.getElementById('up-url').value; 
+            if(!t || !u) return toast("Empty Fields", "error"); 
+            toggleLoader(true); 
+            await api("upload", { teacherId: user.teacherId, teacherName: user.name, title: t, url: u, type: document.getElementById('up-type').value }); 
+            toast("Resource Published"); loadHome(); 
+        }
+
         function logout() { localStorage.clear(); location.reload(); }
     </script>
 </body>
