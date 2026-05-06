@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,126 +7,147 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --brand-blue: #0b548b;
-            --brand-orange: #f28c28;
-            --brand-yellow: #f4b41a;
-            --off-white: #f8f9fa;
+    <script>
+        // Tailwind configuration for custom brand colors
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brandBlue: '#004a80',
+                        brandOrange: '#f7941d',
+                        offWhite: '#fdfbf7',
+                    }
+                }
+            }
         }
-        body { background: #020b14; color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; }
-        .glass { background: rgba(10, 25, 41, 0.8); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.05); }
+    </script>
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; transition: background-color 0.3s, color 0.3s; }
+        .glass { backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); }
         
-        /* The requested Gradient for buttons */
+        /* Gradient Button - Blue to Orange mix based on logo */
         .btn-brand { 
-            background: linear-gradient(135deg, #0b548b 0%, #1e88e5 50%, #f28c28 100%); 
-            transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            background: linear-gradient(135deg, #004a80 0%, #006eb9 50%, #f7941d 100%);
+            transition: 0.4s;
             background-size: 200% auto;
         }
-        .btn-brand:hover { background-position: right center; transform: translateY(-2px); box-shadow: 0 10px 20px -10px #f28c28; }
-        
-        .input-field { background: #061424; border: 1px solid #162a42; padding: 1rem; border-radius: 12px; width: 100%; outline: none; color: white; transition: 0.3s; }
-        .input-field:focus { border-color: #f28c28; box-shadow: 0 0 0 2px rgba(242, 140, 40, 0.1); }
-        
-        #global-loader { fixed inset-0 z-[300] bg-[#020b14]/98 flex flex-col items-center justify-center transition-all duration-500; }
-        .spinner { width: 40px; height: 40px; border: 3px solid #0b548b; border-top: 3px solid #f28c28; border-radius: 50%; animation: spin 1s linear infinite; }
-        
-        /* Responsive Logo Heading Style */
-        .brand-text { font-weight: 800; letter-spacing: -0.05em; font-style: italic; }
-        .brand-open { color: var(--off-white); }
-        .brand-class { color: var(--brand-orange); text-shadow: 0 0 15px rgba(242, 140, 40, 0.3); }
+        .btn-brand:hover { background-position: right center; transform: translateY(-2px); }
 
+        /* Themed Spinner */
+        .spinner { 
+            width: 50px; height: 50px; 
+            border: 5px solid rgba(0, 74, 128, 0.2); 
+            border-top: 5px solid #f7941d; 
+            border-bottom: 5px solid #004a80;
+            border-radius: 50%; 
+            animation: spin 1s linear infinite; 
+        }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-track { background: #020b14; }
-        ::-webkit-scrollbar-thumb { background: linear-gradient(#0b548b, #f28c28); border-radius: 10px; }
+
+        .logo-text-open { color: #fdfbf7; }
+        .logo-text-class { color: #f7941d; }
+        
+        /* Dark/Light mode overrides */
+        .dark body { background: #050505; color: #fff; }
+        .light body { background: #fdfbf7; color: #002e50; }
+        .light .glass { background: rgba(255, 255, 255, 0.7); border: 1px solid rgba(0, 74, 128, 0.1); }
+        .light .input-field { background: #fff; border: 1px solid #d1d5db; color: #002e50; }
     </style>
 </head>
-<body>
+<body class="selection:bg-brandOrange/30">
 
-    <div id="toast-box" class="fixed top-4 right-4 left-4 md:left-auto z-[450] flex flex-col gap-3"></div>
+    <!-- Toast Notifications -->
+    <div id="toast-box" class="fixed top-4 right-4 left-4 md:left-auto z-[500] flex flex-col gap-3"></div>
 
-    <div id="global-loader" class="hidden">
+    <!-- Global Loader -->
+    <div id="global-loader" class="hidden fixed inset-0 z-[400] bg-black/80 flex flex-col items-center justify-center transition-all duration-500">
         <div class="spinner"></div>
-        <p class="mt-4 text-[10px] font-bold uppercase tracking-widest text-zinc-500">Processing Campus Request...</p>
+        <p class="mt-4 text-[10px] font-bold uppercase tracking-widest text-brandOrange">Syncing Campus Hub...</p>
     </div>
 
     <!-- Media Vault -->
-    <div id="media-vault" class="hidden fixed inset-0 z-[250] bg-black flex flex-col">
+    <div id="media-vault" class="hidden fixed inset-0 z-[350] bg-black flex flex-col">
         <nav class="p-4 glass border-b border-white/5 flex justify-between items-center px-6 md:px-10">
-            <h3 id="vault-title" class="brand-text text-xs md:text-sm uppercase truncate mr-4">
-                <span class="brand-open">Secure</span> <span class="brand-class">Vault</span>
-            </h3>
-            <button onclick="closeVault()" class="bg-[#0b548b]/20 text-white px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-red-500/50 transition-colors">Close</button>
+            <div class="flex items-center gap-3">
+                <img src="https://res.cloudinary.com/dowhvdkjh/image/upload/v1777895769/IMG-20260504-WA0002_fucbjd.jpg" class="h-8 rounded" alt="Logo">
+                <h3 id="vault-title" class="font-black text-xs md:text-sm italic uppercase truncate max-w-[200px]"><span class="logo-text-open">Open</span><span class="logo-text-class">Class</span></h3>
+            </div>
+            <button onclick="closeVault()" class="bg-brandBlue text-white px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-colors">Close</button>
         </nav>
-        <div class="flex-grow flex items-center justify-center p-2 md:p-4">
-            <iframe id="vault-frame" class="w-full aspect-video md:h-full max-w-6xl rounded-xl border border-white/5 shadow-2xl" allowfullscreen></iframe>
+        <div class="flex-grow flex items-center justify-center p-2 md:p-4 bg-zinc-900">
+            <iframe id="vault-frame" class="w-full aspect-video md:h-full max-w-6xl rounded-xl shadow-2xl bg-black" allowfullscreen></iframe>
         </div>
     </div>
 
-    <!-- Management Modal -->
-    <div id="mgr-modal" class="hidden fixed inset-0 z-[350] bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
-        <div class="w-full max-w-md glass p-6 md:p-10 rounded-[2rem] border border-[#0b548b]/30">
-            <h3 id="mgr-title" class="text-xl md:text-2xl font-black mb-4 tracking-tighter italic brand-class">Edit Resource</h3>
-            <div id="mgr-body" class="space-y-4 mb-8"></div>
-            <div class="flex gap-3" id="mgr-footer"></div>
-        </div>
-    </div>
-
-    <!-- OTP Modal -->
-    <div id="otp-modal" class="hidden fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-4">
-        <div class="w-full max-w-sm glass p-8 md:p-10 rounded-[2.5rem] relative text-center border border-[#0b548b]/30">
-            <button onclick="closeOtp()" class="absolute top-6 right-6 text-zinc-500 hover:text-white">✕</button>
-            <h3 class="text-xl md:text-2xl font-black mb-2 text-white">Verify Identity</h3>
-            <p id="otp-note" class="text-zinc-500 text-[9px] mb-8 uppercase font-bold tracking-widest"></p>
-            <input type="number" id="otp-input" class="input-field text-center text-3xl font-black mb-8 tracking-tighter" placeholder="000000">
-            <button onclick="verifyOtp()" class="w-full py-4 btn-brand rounded-2xl font-bold uppercase tracking-widest text-white shadow-lg">Verify</button>
-        </div>
-    </div>
-
+    <!-- App Container -->
     <div id="app">
         <!-- Auth View -->
-        <div id="auth-screen" class="min-h-screen flex items-center justify-center p-6">
-            <div class="w-full max-w-md glass p-8 md:p-12 rounded-[3rem] border border-[#0b548b]/20 shadow-2xl text-center">
-                <img src="https://res.cloudinary.com/dowhvdkjh/image/upload/v1777895769/IMG-20260504-WA0002_fucbjd.jpg" alt="Logo" class="w-20 h-20 mx-auto mb-6 rounded-2xl shadow-lg border border-white/10">
-                <h1 class="text-4xl md:text-5xl brand-text mb-8 md:mb-10">
-                    <span class="brand-open">Open</span><span class="brand-class">Class</span>
+        <div id="auth-screen" class="min-h-screen flex items-center justify-center p-6 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-brandBlue/20 via-transparent to-transparent">
+            <div class="w-full max-w-md glass p-8 md:p-10 rounded-[2.5rem] shadow-2xl text-center">
+                <img src="https://res.cloudinary.com/dowhvdkjh/image/upload/v1777895769/IMG-20260504-WA0002_fucbjd.jpg" class="h-20 mx-auto mb-6 rounded-xl shadow-lg" alt="OpenClass Logo">
+                <h1 class="text-4xl md:text-5xl font-black mb-8 tracking-tighter italic">
+                    <span class="logo-text-open">Open</span><span class="logo-text-class">Class</span>
                 </h1>
                 
-                <div id="signup-fields" class="hidden space-y-4 mb-4 text-left">
-                    <input type="text" id="reg-name" placeholder="Full Name" class="input-field">
-                    <select id="reg-role" class="input-field">
+                <div id="signup-fields" class="hidden space-y-4 mb-4">
+                    <input type="text" id="reg-name" placeholder="Full Name" class="input-field w-full p-4 rounded-xl border-none outline-none dark:bg-zinc-900 bg-zinc-100">
+                    <select id="reg-role" class="input-field w-full p-4 rounded-xl border-none outline-none dark:bg-zinc-900 bg-zinc-100">
                         <option value="STUDENT">Student</option>
                         <option value="TEACHER">Teacher</option>
                     </select>
                 </div>
                 
                 <div class="space-y-4">
-                    <input type="email" id="auth-email" placeholder="Campus Email" class="input-field">
-                    <input type="password" id="auth-pass" placeholder="Password" class="input-field">
-                    <button onclick="handleAuth()" id="primary-btn" class="w-full py-4 btn-brand rounded-2xl font-bold uppercase tracking-widest text-white">Sign In</button>
-                    <button onclick="toggleMode()" class="w-full text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-4 hover:text-[#f28c28] transition-colors">Create Account</button>
+                    <input type="email" id="auth-email" placeholder="Campus Email" class="input-field w-full p-4 rounded-xl border-none outline-none dark:bg-zinc-900 bg-zinc-100">
+                    <div class="relative">
+                        <input type="password" id="auth-pass" placeholder="Password" class="input-field w-full p-4 rounded-xl border-none outline-none dark:bg-zinc-900 bg-zinc-100">
+                        <button onclick="togglePassword('auth-pass')" class="absolute right-4 top-4 text-zinc-500 text-xs font-bold uppercase tracking-widest">View</button>
+                    </div>
+                    <button onclick="handleAuth()" id="primary-btn" class="w-full py-4 btn-brand text-white rounded-2xl font-black uppercase tracking-widest shadow-lg shadow-brandBlue/30">Sign In</button>
+                    <button onclick="toggleMode()" class="w-full text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-4 hover:text-brandOrange transition-colors">Create Campus Account</button>
+                </div>
+                
+                <div class="mt-6 flex justify-center gap-4">
+                    <button onclick="toggleDarkMode()" class="text-[9px] font-bold uppercase tracking-tighter p-2 rounded-lg border border-white/10">Toggle Mode 🌓</button>
                 </div>
             </div>
         </div>
 
         <!-- Dashboard View -->
         <div id="dashboard" class="hidden min-h-screen flex flex-col">
-            <nav class="p-4 md:p-5 glass border-b border-[#0b548b]/30 sticky top-0 z-50 flex flex-col md:flex-row gap-4 justify-between px-6 md:px-10 items-center">
-                <h2 class="text-xl md:text-2xl brand-text cursor-pointer" onclick="loadHome()">
-                    <span class="brand-open">Open</span><span class="brand-class">Class</span>
-                </h2>
+            <nav class="p-4 md:p-5 glass border-b border-white/5 sticky top-0 z-50 flex flex-col md:flex-row gap-4 md:gap-0 justify-between px-6 md:px-10 items-center">
+                <div class="flex items-center gap-3 w-full md:w-auto">
+                    <img src="https://res.cloudinary.com/dowhvdkjh/image/upload/v1777895769/IMG-20260504-WA0002_fucbjd.jpg" class="h-10 rounded cursor-pointer" onclick="loadHome()" alt="Logo">
+                    <h2 class="text-xl md:text-2xl font-black tracking-tighter cursor-pointer italic" onclick="loadHome()">
+                        <span class="logo-text-open dark:text-offWhite text-brandBlue">Open</span><span class="logo-text-class">Class</span>
+                    </h2>
+                </div>
                 
                 <div class="relative w-full md:w-auto">
-                    <input type="text" id="g-search" onkeyup="handleSearch(event)" placeholder="Search Teacher or ID..." class="bg-[#04111d] border border-[#162a42] rounded-2xl px-6 py-2 text-sm w-full md:w-80 outline-none focus:border-[#f28c28] transition-all md:focus:w-96 text-white">
-                    <div id="search-results" class="hidden absolute top-full left-0 right-0 mt-4 glass p-4 rounded-[1.5rem] border border-[#0b548b]/50 max-h-[60vh] overflow-y-auto shadow-2xl"></div>
+                    <input type="text" id="g-search" onkeyup="handleSearch(event)" placeholder="Search Teacher or ID..." class="bg-zinc-900/50 dark:text-white text-zinc-800 border border-brandBlue/20 rounded-2xl px-6 py-2 text-sm w-full md:w-80 outline-none focus:border-brandOrange transition-all md:focus:w-96">
+                    <div id="search-results" class="hidden absolute top-full left-0 right-0 mt-4 glass p-4 rounded-[1.5rem] md:rounded-[2rem] border border-brandOrange/20 max-h-[60vh] overflow-y-auto shadow-2xl"></div>
                 </div>
 
                 <div class="flex items-center gap-4">
-                    <button onclick="logout()" class="text-[10px] font-black text-zinc-500 hover:text-red-500 uppercase tracking-widest transition-colors">Logout</button>
+                    <button onclick="toggleDarkMode()" class="text-xs">🌓</button>
+                    <button onclick="logout()" class="text-[10px] font-black text-red-500 uppercase tracking-widest">Logout</button>
                 </div>
             </nav>
             <main id="main-content" class="p-4 md:p-10 max-w-7xl mx-auto w-full flex-grow"></main>
+        </div>
+    </div>
+
+    <!-- OTP Modal -->
+    <div id="otp-modal" class="hidden fixed inset-0 z-[450] bg-black/95 flex items-center justify-center p-4">
+        <div class="w-full max-w-sm glass p-8 rounded-[3rem] text-center border border-brandOrange/20">
+            <h3 class="text-2xl font-black mb-2 logo-text-class italic">Verify Security Code</h3>
+            <p id="otp-note" class="text-zinc-500 text-[9px] mb-8 uppercase font-bold"></p>
+            <input type="number" id="otp-input" class="input-field text-center text-4xl font-black mb-8 dark:bg-zinc-900 bg-white" placeholder="000000">
+            <div class="flex gap-2">
+                <button onclick="closeOtp()" class="flex-1 py-4 bg-zinc-800 rounded-2xl font-bold uppercase text-xs">Cancel</button>
+                <button onclick="verifyOtp()" class="flex-2 px-8 py-4 btn-brand rounded-2xl font-bold uppercase text-xs text-white">Verify</button>
+            </div>
         </div>
     </div>
 
@@ -142,21 +163,39 @@
         let user = JSON.parse(localStorage.getItem('oc_user'));
         let isSignup = false, genOtp, pending;
 
+        // --- Core Utility Functions ---
+
+        function togglePassword(id) {
+            const el = document.getElementById(id);
+            el.type = el.type === 'password' ? 'text' : 'password';
+        }
+
+        function toggleDarkMode() {
+            const html = document.documentElement;
+            html.classList.toggle('dark');
+            const isDark = html.classList.contains('dark');
+            localStorage.setItem('oc_theme', isDark ? 'dark' : 'light');
+        }
+
+        // Initialize theme
+        if (localStorage.getItem('oc_theme') === 'light') {
+            document.documentElement.classList.remove('dark');
+        }
+
         function toast(msg, type="success") {
             const b = document.getElementById('toast-box');
             const d = document.createElement('div');
-            d.className = `glass px-6 py-4 rounded-xl border-l-4 ${type==='success'?'border-[#f28c28]':'border-red-500'} text-[10px] font-bold uppercase tracking-widest shadow-2xl`;
+            d.className = `glass px-6 py-4 rounded-xl border-l-4 ${type==='success'?'border-brandOrange':'border-red-500'} text-[10px] font-black uppercase tracking-widest shadow-2xl animate-bounce`;
             d.innerText = msg; b.appendChild(d);
-            setTimeout(() => { d.style.opacity = '0'; setTimeout(() => d.remove(), 500); }, 3000);
+            setTimeout(() => d.remove(), 4000);
         }
 
         function toggleLoader(s) { document.getElementById('global-loader').classList[s?'remove':'add']('hidden'); }
         function closeOtp() { document.getElementById('otp-modal').classList.add('hidden'); genOtp = null; }
         function closeVault() { document.getElementById('media-vault').classList.add('hidden'); document.getElementById('vault-frame').src=""; }
-        function closeMgr() { document.getElementById('mgr-modal').classList.add('hidden'); }
 
         window.addEventListener('keydown', e => {
-            if(e.key === 'Escape') { closeVault(); closeOtp(); closeMgr(); }
+            if(e.key === 'Escape') { closeVault(); closeOtp(); }
         });
 
         if(user) renderDashboard();
@@ -167,24 +206,31 @@
             document.getElementById('primary-btn').innerText = isSignup ? "Verify Email" : "Sign In";
         }
 
+        // --- Auth Logic ---
+
         async function handleAuth() {
             const email = document.getElementById('auth-email').value.trim();
             const pass = document.getElementById('auth-pass').value;
             if(!email || !pass) return toast("Fill all fields", "error");
             
             if(isSignup) {
+                toggleLoader(true);
                 genOtp = Math.floor(100000 + Math.random() * 900000);
                 pending = { email, password: pass, name: document.getElementById('reg-name').value, role: document.getElementById('reg-role').value };
-                document.getElementById('otp-note').innerText = `Verification code sent to ${email}`;
+                document.getElementById('otp-note').innerText = `Security code sent to ${email}`;
                 try {
                     await emailjs.send(CONFIG.EMAIL_SVC, CONFIG.EMAIL_TMP, { to_email: email, otp: genOtp });
                     document.getElementById('otp-modal').classList.remove('hidden');
                 } catch(e) { toast("Email Service Error", "error"); }
+                toggleLoader(false);
             } else {
                 toggleLoader(true);
                 const res = await api("login", { email, password: pass });
-                if(res.email) { localStorage.setItem('oc_user', JSON.stringify(res)); user = res; renderDashboard(); }
-                else toast(res, "error");
+                if(res.email) { 
+                    localStorage.setItem('oc_user', JSON.stringify(res)); 
+                    user = res; renderDashboard(); 
+                    toast(`Welcome back, ${user.name}`);
+                } else toast(res, "error");
                 toggleLoader(false);
             }
         }
@@ -193,10 +239,12 @@
             if(document.getElementById('otp-input').value == genOtp) {
                 toggleLoader(true);
                 await api("signup", pending);
-                toast("Campus Access Granted!");
+                toast("Campus Registration Success!");
                 location.reload();
-            } else toast("Wrong OTP Code", "error");
+            } else toast("Security Code Mismatch", "error");
         }
+
+        // --- Dashboard Logic ---
 
         function renderDashboard() {
             document.getElementById('auth-screen').style.display = 'none';
@@ -210,13 +258,16 @@
             if(user.role === 'TEACHER') {
                 main.innerHTML = `
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-10">
-                        <div class="glass p-6 md:p-8 rounded-[2rem] h-fit lg:sticky lg:top-28 border border-[#0b548b]/20">
-                            <h3 class="text-[#f28c28] font-black text-[10px] uppercase mb-6 tracking-widest italic underline decoration-[#0b548b]">Publish Resource</h3>
-                            <input id="up-title" placeholder="Topic Title" class="input-field mb-3">
-                            <input id="up-url" placeholder="Resource URL" class="input-field mb-3">
-                            <select id="up-type" class="input-field mb-6"><option value="VIDEO">Video Lesson</option><option value="FILE">Static File</option></select>
-                            <button onclick="publish()" class="w-full py-4 btn-brand rounded-2xl font-bold text-xs uppercase tracking-widest text-white shadow-lg">Post Live</button>
-                            <div class="mt-8 pt-6 border-t border-[#0b548b]/30"><p class="text-[9px] text-zinc-500 uppercase font-black text-center">Campus ID: ${user.teacherId}</p></div>
+                        <div class="glass p-6 md:p-8 rounded-[2rem] h-fit lg:sticky lg:top-28 border-brandBlue/10">
+                            <h3 class="text-brandOrange font-black text-[10px] uppercase mb-6 tracking-widest italic">Publish Resource</h3>
+                            <input id="up-title" placeholder="Topic Title" class="input-field mb-3 w-full p-3 rounded-xl dark:bg-zinc-900 bg-white border-none outline-none">
+                            <input id="up-url" placeholder="Resource URL (YouTube/Drive)" class="input-field mb-3 w-full p-3 rounded-xl dark:bg-zinc-900 bg-white border-none outline-none">
+                            <select id="up-type" class="input-field mb-6 w-full p-3 rounded-xl dark:bg-zinc-900 bg-white border-none outline-none">
+                                <option value="VIDEO">Video Lesson</option>
+                                <option value="FILE">Static File</option>
+                            </select>
+                            <button onclick="publish()" class="w-full py-4 btn-brand text-white rounded-xl font-bold text-xs uppercase tracking-widest shadow-lg">Go Live</button>
+                            <div class="mt-8 pt-6 border-t border-brandBlue/10"><p class="text-[9px] text-zinc-500 uppercase font-black text-center tracking-widest">ID: ${user.teacherId}</p></div>
                         </div>
                         <div id="feed" class="lg:col-span-2 space-y-4 md:space-y-6"></div>
                     </div>`;
@@ -235,18 +286,18 @@
             const resDiv = document.getElementById('search-results');
             if(q.length < 2) return resDiv.classList.add('hidden');
             resDiv.classList.remove('hidden');
-            resDiv.innerHTML = `<p class="p-4 text-center text-[10px] font-black text-[#0b548b] animate-pulse uppercase">Scanning Campus Network...</p>`;
+            resDiv.innerHTML = `<p class="p-4 text-center text-[10px] font-black text-brandOrange animate-pulse uppercase">Searching Network...</p>`;
             const data = await api("search", { email: user.email }, q);
             resDiv.innerHTML = data.map(t => `
-                <div class="p-4 hover:bg-[#0b548b]/10 rounded-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 cursor-pointer group" onclick="viewTeacherProfile('${t.id}')">
+                <div class="p-4 hover:bg-brandBlue/10 rounded-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 cursor-pointer group" onclick="viewTeacherProfile('${t.id}')">
                     <div class="flex-grow">
                         <div class="flex items-center gap-2">
-                            <p class="font-bold text-sm text-white">${t.name}</p>
-                            <span class="text-[8px] bg-[#f28c28]/20 text-[#f28c28] px-2 py-0.5 rounded-full font-black">${t.id}</span>
+                            <p class="font-bold text-sm">${t.name}</p>
+                            <span class="text-[8px] bg-brandOrange/10 text-brandOrange px-2 py-0.5 rounded-full font-black">${t.id}</span>
                         </div>
                         <p class="text-[9px] text-zinc-500 uppercase font-bold tracking-widest">${t.postCount} Posts • ${t.subCount} Subs</p>
                     </div>
-                    <button onclick="event.stopPropagation(); toggleSubscription(this, '${t.id}', ${t.isSubscribed})" class="w-full sm:w-auto px-4 py-2 ${t.isSubscribed?'bg-[#162a42] text-zinc-500':'btn-brand text-white'} rounded-xl text-[9px] font-black uppercase transition-all shadow-md">
+                    <button onclick="event.stopPropagation(); toggleSubscription(this, '${t.id}', ${t.isSubscribed})" class="w-full sm:w-auto px-4 py-2 ${t.isSubscribed?'bg-zinc-800 text-zinc-600':'btn-brand text-white'} rounded-xl text-[9px] font-black uppercase transition-all">
                         ${t.isSubscribed?'Unsubscribe':'Subscribe'}
                     </button>
                 </div>`).join('');
@@ -256,7 +307,7 @@
             btn.disabled = true;
             const action = isSubbed ? "unsubscribe" : "subscribe";
             await api(action, { studentEmail: user.email, teacherId: tId });
-            toast(`${isSubbed?'Removed':'Added'} Teacher!`);
+            toast(`${isSubbed?'Unfollowed':'Following'} Teacher!`);
             handleSearch({ target: { value: document.getElementById('g-search').value } });
             if(user.role === 'STUDENT') loadHome();
         }
@@ -268,33 +319,33 @@
             const main = document.getElementById('main-content');
             main.innerHTML = `
                 <div class="max-w-4xl mx-auto">
-                    <button onclick="loadHome()" class="mb-6 text-zinc-500 text-[10px] font-black uppercase tracking-widest hover:text-[#f28c28]">← Back to Feed</button>
-                    <div class="glass p-6 md:p-10 rounded-[3rem] border border-[#0b548b]/30 mb-6 flex flex-col md:flex-row justify-between items-center gap-6 shadow-xl">
+                    <button onclick="loadHome()" class="mb-8 text-brandBlue dark:text-offWhite text-[10px] font-black uppercase tracking-widest hover:text-brandOrange transition-colors">← Back to Campus Feed</button>
+                    <div class="glass p-6 md:p-10 rounded-[3rem] border border-brandOrange/10 mb-6 md:mb-10 flex flex-col md:flex-row justify-between items-center gap-6">
                         <div class="text-center md:text-left">
-                            <span class="text-[9px] text-[#f28c28] font-black uppercase tracking-widest">Verified Instructor</span>
-                            <h2 class="text-3xl md:text-4xl brand-text mt-1 italic"><span class="brand-open">Prof. </span><span class="brand-class">${t.name}</span></h2>
-                            <p class="text-zinc-500 font-bold text-sm uppercase tracking-widest">${t.institute}</p>
+                            <span class="text-[9px] text-brandOrange font-black uppercase tracking-widest">Verified Expert</span>
+                            <h2 class="text-3xl md:text-4xl font-black italic tracking-tighter mt-1 logo-text-class">${t.name}</h2>
+                            <p class="text-brandBlue dark:text-zinc-400 font-bold text-sm uppercase tracking-widest">${t.institute}</p>
                         </div>
-                        <div class="flex items-center gap-10">
-                            <div class="flex gap-10">
-                                <div class="text-center"><p class="text-[9px] text-zinc-600 font-bold uppercase tracking-widest">Resources</p><p class="text-2xl md:text-3xl font-black text-white">${t.postCount}</p></div>
-                                <div class="text-center"><p class="text-[9px] text-zinc-600 font-bold uppercase tracking-widest">Campus Subs</p><p class="text-2xl md:text-3xl font-black text-white">${t.subCount}</p></div>
+                        <div class="flex items-center gap-6 md:gap-10">
+                            <div class="flex gap-6 md:gap-10">
+                                <div class="text-center"><p class="text-[9px] text-zinc-600 font-bold uppercase tracking-widest">Resources</p><p class="text-2xl md:text-3xl font-black">${t.postCount}</p></div>
+                                <div class="text-center"><p class="text-[9px] text-zinc-600 font-bold uppercase tracking-widest">Following</p><p class="text-2xl md:text-3xl font-black">${t.subCount}</p></div>
                             </div>
-                            <button onclick="toggleSubscription(this, '${t.id}', ${t.isSubscribed})" class="px-8 py-3 ${t.isSubscribed?'bg-[#162a42] text-zinc-500':'btn-brand text-white'} rounded-2xl text-[10px] font-black uppercase transition-all shadow-xl">
+                            <button onclick="toggleSubscription(this, '${t.id}', ${t.isSubscribed})" class="px-6 md:px-8 py-3 ${t.isSubscribed?'bg-zinc-800 text-zinc-600':'btn-brand text-white'} rounded-2xl text-[10px] font-black uppercase transition-all shadow-xl">
                                 ${t.isSubscribed?'Unsubscribe':'Subscribe'}
                             </button>
                         </div>
                     </div>
                     <div class="space-y-4">${t.posts.map(p => `
-                        <div class="glass p-5 md:p-6 rounded-[2rem] flex justify-between items-center border border-transparent hover:border-[#0b548b]/50 transition-all">
-                            <div class="flex items-center gap-4 truncate">
-                                <div class="flex-shrink-0 w-10 h-10 bg-[#061424] rounded-2xl flex items-center justify-center border border-[#0b548b]/30 text-[#f28c28]">${p.type==='VIDEO'?'🎬':'📄'}</div>
-                                <div class="truncate text-left">
-                                    <h4 class="font-bold text-sm text-zinc-200 truncate">${p.title}</h4>
-                                    <p class="text-[8px] text-[#0b548b] uppercase font-bold tracking-widest">by ${t.name}</p>
+                        <div class="glass p-5 md:p-6 rounded-[1.5rem] flex justify-between items-center group border border-transparent hover:border-brandOrange/20 transition-all">
+                            <div class="flex items-center gap-3 md:gap-4 truncate">
+                                <div class="flex-shrink-0 w-10 h-10 bg-brandBlue/10 rounded-2xl flex items-center justify-center text-brandBlue">${p.type==='VIDEO'?'🎬':'📄'}</div>
+                                <div class="truncate">
+                                    <h4 class="font-bold text-sm truncate">${p.title}</h4>
+                                    <p class="text-[8px] text-brandOrange font-bold uppercase tracking-widest">by ${t.name}</p>
                                 </div>
                             </div>
-                            <button onclick="openResource('${p.id}','${p.url}','${p.type}','${p.title}')" class="flex-shrink-0 bg-white text-[#0b548b] px-6 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-[#f28c28] hover:text-white transition-all shadow-md">Access</button>
+                            <button onclick="openResource('${p.id}','${p.url}','${p.type}','${p.title}')" class="bg-brandBlue text-white px-4 md:px-6 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:scale-105 transition-all">View</button>
                         </div>`).join('')}</div>
                 </div>`;
             document.getElementById('search-results').classList.add('hidden');
@@ -302,59 +353,31 @@
         }
 
         async function publish() {
-            const title = document.getElementById('up-title').value.trim();
-            const url = document.getElementById('up-url').value.trim();
-            if(!title || !url) return toast("Fill all fields", "error");
-            const p = { teacherId: user.teacherId, teacherName: user.name, title, url, type: document.getElementById('up-type').value };
-            toggleLoader(true); await api("upload", p); toast("Campus Resource Published!"); loadHome();
+            const t = document.getElementById('up-title').value.trim();
+            const u = document.getElementById('up-url').value.trim();
+            if(!t || !u) return toast("Missing metadata", "error");
+            toggleLoader(true); 
+            await api("upload", { teacherId: user.teacherId, teacherName: user.name, title: t, url: u, type: document.getElementById('up-type').value }); 
+            toast("Resource Live!"); loadHome();
         }
 
         function renderFeed(data, isT) {
             const f = document.getElementById('feed');
-            if(!data || !data.length) { f.innerHTML = `<p class="text-center py-20 text-zinc-800 uppercase text-[9px] font-black tracking-widest animate-pulse">No campus activity found</p>`; return; }
+            if(!data || !data.length) { f.innerHTML = `<p class="text-center py-20 text-zinc-500 uppercase text-[9px] font-black tracking-widest animate-pulse">No activity in this sector</p>`; return; }
             f.innerHTML = data.map(i => `
-                <div class="glass p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] flex flex-col sm:flex-row justify-between items-center border border-transparent hover:border-[#0b548b]/30 transition-all group shadow-xl gap-6">
-                    <div class="flex items-center gap-6 w-full sm:w-auto">
-                        <div class="flex-shrink-0 w-12 h-12 md:w-14 md:h-14 bg-[#061424] border border-[#0b548b]/20 rounded-3xl flex items-center justify-center transition-all group-hover:scale-110 group-hover:border-[#f28c28]">${i.type==='VIDEO'?'🎬':'📄'}</div>
-                        <div class="truncate text-left">
-                            <p class="text-[9px] text-[#f28c28] font-black uppercase tracking-widest">${i.type}</p>
-                            <h4 class="font-black text-lg md:text-xl text-zinc-200 tracking-tight italic truncate">${i.title}</h4>
-                            <p class="text-[9px] text-zinc-600 font-bold uppercase tracking-widest truncate">${i.tName ? 'Instructor: ' + i.tName : 'Campus Secure Resource'} • ${i.views||0} Views</p>
+                <div class="glass p-6 md:p-8 rounded-[2rem] flex flex-col sm:flex-row justify-between items-center border border-transparent hover:border-brandBlue/30 transition-all group shadow-xl gap-6">
+                    <div class="flex items-center gap-4 md:gap-6 w-full sm:w-auto">
+                        <div class="flex-shrink-0 w-12 h-12 md:w-14 md:h-14 bg-brandBlue/10 rounded-3xl flex items-center justify-center transition-all group-hover:scale-110">${i.type==='VIDEO'?'🎬':'📄'}</div>
+                        <div class="truncate">
+                            <p class="text-[9px] text-brandOrange font-black uppercase tracking-widest">${i.type}</p>
+                            <h4 class="font-black text-lg md:text-xl tracking-tight italic truncate">${i.title}</h4>
+                            <p class="text-[9px] text-zinc-500 font-bold uppercase tracking-widest truncate">${i.tName ? 'By: ' + i.tName : 'Campus Secure'} • ${i.views||0} Views</p>
                         </div>
                     </div>
                     <div class="flex gap-2 w-full sm:w-auto">
-                        <button onclick="openResource('${i.id}','${i.url}','${i.type}','${i.title}')" class="flex-grow sm:flex-grow-0 bg-white text-[#0b548b] px-8 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-[#f28c28] hover:text-white transition-all shadow-lg">Open</button>
-                        ${isT ? `
-                            <button onclick="openEdit('${i.id}','${i.title}','${i.url}')" class="p-3 bg-[#061424] border border-white/5 rounded-xl hover:text-[#f28c28] transition-all">✎</button>
-                            <button onclick="openDel('${i.id}')" class="p-3 bg-[#061424] border border-white/5 rounded-xl hover:text-red-500 transition-all">🗑</button>
-                        ` : ''}
+                        <button onclick="openResource('${i.id}','${i.url}','${i.type}','${i.title}')" class="flex-grow sm:flex-grow-0 bg-brandBlue text-white px-6 md:px-8 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:scale-105 shadow-lg">Access</button>
                     </div>
                 </div>`).join('');
-        }
-
-        function openEdit(id, t, u) {
-            document.getElementById('mgr-title').innerText = "Update Resource";
-            document.getElementById('mgr-body').innerHTML = `<input id="e-t" value="${t}" class="input-field"><input id="e-u" value="${u}" class="input-field">`;
-            document.getElementById('mgr-footer').innerHTML = `<button onclick="closeMgr()" class="flex-1 py-4 bg-[#061424] rounded-xl font-black uppercase text-[10px] text-zinc-500">Cancel</button><button onclick="saveEdit('${id}')" class="flex-1 py-4 btn-brand rounded-xl uppercase font-black text-[10px] text-white">Update</button>`;
-            document.getElementById('mgr-modal').classList.remove('hidden');
-        }
-
-        async function saveEdit(id) {
-            const title = document.getElementById('e-t').value.trim();
-            const url = document.getElementById('e-u').value.trim();
-            if(!title || !url) return toast("Empty fields", "error");
-            closeMgr(); toggleLoader(true); await api("edit_content", { id, title, url }); toast("Sync Complete!"); loadHome();
-        }
-
-        function openDel(id) {
-            document.getElementById('mgr-title').innerText = "Remove Permanently";
-            document.getElementById('mgr-body').innerHTML = `<p class="text-zinc-500 text-xs uppercase font-bold tracking-widest leading-loose">Resource destruction is permanent.</p>`;
-            document.getElementById('mgr-footer').innerHTML = `<button onclick="closeMgr()" class="flex-1 py-4 bg-[#061424] rounded-xl font-black uppercase text-[10px] text-zinc-500">Cancel</button><button onclick="confirmDel('${id}')" class="flex-1 py-4 bg-red-600/80 rounded-xl uppercase font-black text-[10px] text-white">Delete</button>`;
-            document.getElementById('mgr-modal').classList.remove('hidden');
-        }
-
-        async function confirmDel(id) {
-            closeMgr(); toggleLoader(true); await api("delete_content", { id }); toast("Resource Destroyed!", "error"); loadHome();
         }
 
         function openResource(id, url, type, title) {
@@ -372,7 +395,7 @@
             try {
                 const r = await fetch(`${CONFIG.URL}?action=${a}&query=${q}&payload=${encodeURIComponent(JSON.stringify(p))}`);
                 return await r.json();
-            } catch(e) { return "Network Error"; }
+            } catch(e) { return "System Latency Error"; }
         }
 
         function logout() { localStorage.clear(); location.reload(); }
