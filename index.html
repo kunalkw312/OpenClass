@@ -34,11 +34,10 @@
         .input-field { background: var(--input-bg); border: 1px solid rgba(128,128,128,0.25); color: var(--text-main); outline: none; transition: 0.3s; }
         .input-field:focus { border-color: #f7941d; box-shadow: 0 0 0 4px rgba(247, 148, 29, 0.1); }
         
-        .skeleton { background: linear-gradient(90deg, rgba(128,128,128,0.1) 25%, rgba(128,128,128,0.2) 50%, rgba(128,128,128,0.1) 75%); background-size: 200% 100%; animation: shimmer 600ms infinite; }
+        .skeleton { background: linear-gradient(90deg, rgba(128,128,128,0.1) 25%, rgba(128,128,128,0.2) 50%, rgba(128,128,128,0.1) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
         @keyframes shimmer { 100% { background-position: -200% 0; } }
 
-        /* SaaS Access Loader */
-        .access-loader { width: 40px; height: 40px; border: 3px solid rgba(247, 148, 29, 0.1); border-left-color: #f7941d; border-radius: 50%; animation: spin 1s linear infinite; }
+        .access-loader { width: 30px; height: 30px; border: 3px solid rgba(247, 148, 29, 0.1); border-left-color: #f7941d; border-radius: 50%; animation: spin 0.6s linear infinite; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
     </style>
 </head>
@@ -46,11 +45,10 @@
 
     <div id="toast-box"></div>
 
-    <!-- Access Handshake Screen (SaaS Animation) -->
-    <div id="access-screen" class="hidden fixed inset-0 z-[600] bg-black flex flex-col items-center justify-center transition-opacity duration-500">
+    <!-- Access Handshake Screen (Optimized < 1s) -->
+    <div id="access-screen" class="hidden fixed inset-0 z-[600] bg-black/90 backdrop-blur-md flex flex-col items-center justify-center transition-opacity duration-300">
         <div class="access-loader"></div>
-        <p class="mt-6 text-[10px] font-black uppercase tracking-[0.3em] text-brandOrange animate-pulse">Establishing Secure Handshake</p>
-        <p class="mt-2 text-[8px] text-zinc-600 font-bold uppercase tracking-widest">Verifying Authorization Tokens...</p>
+        <p class="mt-4 text-[9px] font-black uppercase tracking-[0.4em] text-brandOrange">Authorizing</p>
     </div>
 
     <!-- Media Vault -->
@@ -101,7 +99,7 @@
                 </div>
                 <div class="relative w-full md:w-auto flex items-center">
                     <input type="text" id="g-search" onkeyup="if(event.key==='Enter') navigate('search', this.value)" placeholder="Search Campus..." class="input-field rounded-l-2xl px-6 py-2.5 text-sm w-full md:w-80">
-                    <button onclick="navigate('search', document.getElementById('g-search').value)" class="bg-brandOrange p-3 rounded-r-2xl text-white shadow-lg shadow-brandOrange/20">
+                    <button onclick="navigate('search', document.getElementById('g-search').value)" class="bg-brandOrange p-3 rounded-r-2xl text-white">
                         <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="3"><circle cx="8" cy="8" r="5"/><path d="M12 12l4 4"/></svg>
                     </button>
                 </div>
@@ -149,15 +147,10 @@
             el.className = 'toast-pill';
             el.innerText = msg;
             box.appendChild(el);
-            setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 300); }, 3000);
+            setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 300); }, 2500);
         }
 
-        window.onpopstate = (e) => {
-            if (user) {
-                const state = e.state || { page: 'home' };
-                renderPage(state.page, state.query);
-            }
-        };
+        window.onpopstate = (e) => { if (user) renderPage(e.state?.page || 'home', e.state?.query || ''); };
 
         function navigate(page, query = '') {
             history.pushState({ page, query }, '', `#${page}${query ? '?q=' + query : ''}`);
@@ -168,8 +161,7 @@
             if (!user) return;
             document.getElementById('auth-screen').classList.add('hidden');
             document.getElementById('dashboard').classList.remove('hidden');
-            if (page === 'home') loadHome();
-            if (page === 'search') executeSearch(query);
+            page === 'home' ? loadHome() : executeSearch(query);
         }
 
         async function handleAuth() {
@@ -184,11 +176,8 @@
                 document.getElementById('otp-modal').classList.remove('hidden');
             } else {
                 const res = await api("login", { email, password: pass });
-                if (res.email) {
-                    localStorage.setItem('oc_user', JSON.stringify(res));
-                    user = res;
-                    navigate('home');
-                } else toast(res);
+                if (res.email) { localStorage.setItem('oc_user', JSON.stringify(res)); user = res; navigate('home'); }
+                else toast(res);
             }
         }
 
@@ -198,9 +187,7 @@
                 if (res === "Success") {
                     const loginRes = await api("login", { email: pending.email, password: pending.password });
                     localStorage.setItem('oc_user', JSON.stringify(loginRes));
-                    user = loginRes;
-                    navigate('home');
-                    toast("Welcome to OpenClass");
+                    user = loginRes; navigate('home'); toast("Welcome");
                 }
                 document.getElementById('otp-modal').classList.add('hidden');
             } else toast("Wrong Code");
@@ -210,17 +197,7 @@
             const main = document.getElementById('main-content');
             main.innerHTML = `<div class="grid gap-6">${Array(4).fill('<div class="skeleton h-32 rounded-3xl"></div>').join('')}</div>`;
             if (user.role === 'TEACHER') {
-                main.innerHTML = `
-                    <div class="grid lg:grid-cols-3 gap-10">
-                        <div class="glass p-8 rounded-[3rem] h-fit">
-                            <h3 class="text-brandOrange font-black text-[10px] uppercase mb-6 tracking-widest italic">New Upload</h3>
-                            <input id="up-title" placeholder="Title" class="input-field mb-3 w-full p-3 rounded-xl">
-                            <input id="up-url" placeholder="URL" class="input-field mb-3 w-full p-3 rounded-xl">
-                            <select id="up-type" class="input-field mb-6 w-full p-3 rounded-xl"><option value="VIDEO">Video</option><option value="FILE">Document</option></select>
-                            <button onclick="publish()" class="w-full py-4 btn-brand text-white rounded-xl font-bold text-xs uppercase tracking-widest">Publish</button>
-                        </div>
-                        <div id="feed" class="lg:col-span-2 space-y-4"></div>
-                    </div>`;
+                main.innerHTML = `<div class="grid lg:grid-cols-3 gap-10"><div class="glass p-8 rounded-[3rem] h-fit sticky top-28"><h3 class="text-brandOrange font-black text-[10px] uppercase mb-6 tracking-widest italic">New Upload</h3><input id="up-title" placeholder="Title" class="input-field mb-3 w-full p-3 rounded-xl"><input id="up-url" placeholder="URL" class="input-field mb-3 w-full p-3 rounded-xl"><select id="up-type" class="input-field mb-6 w-full p-3 rounded-xl"><option value="VIDEO">Video</option><option value="FILE">Document</option></select><button onclick="publish()" class="w-full py-4 btn-brand text-white rounded-xl font-bold text-xs uppercase tracking-widest">Publish</button></div><div id="feed" class="lg:col-span-2 space-y-4"></div></div>`;
                 const data = await api("search", { email: user.email }, user.teacherId);
                 renderFeed(data[0]?.posts || []);
             } else {
@@ -234,53 +211,15 @@
             const main = document.getElementById('main-content');
             main.innerHTML = `<div class="skeleton h-32 rounded-[3rem] mb-8"></div><div class="space-y-4">${Array(3).fill('<div class="skeleton h-24 rounded-3xl"></div>').join('')}</div>`;
             const data = await api("search", { email: user.email }, q);
-            renderSearchResults(data);
-        }
-
-        function renderSearchResults(data) {
-            const main = document.getElementById('main-content');
-            if (!data.length) { main.innerHTML = `<p class="text-center py-20 opacity-30 uppercase font-black tracking-widest">Empty Sector</p>`; return; }
+            if (!data.length) { main.innerHTML = `<p class="text-center py-20 opacity-30 uppercase font-black">Empty Sector</p>`; return; }
             const top = data[0];
-            main.innerHTML = `
-                <div class="space-y-10">
-                    <div class="glass p-8 rounded-[3rem] border border-brandOrange/20 flex flex-col md:flex-row justify-between items-center gap-6">
-                        <div class="flex items-center gap-6">
-                            <div class="w-16 h-16 btn-brand rounded-2xl flex items-center justify-center text-white text-3xl font-black">${top.name[0]}</div>
-                            <div>
-                                <h2 class="text-2xl font-black italic">${top.name}</h2>
-                                <p class="text-[10px] opacity-60 uppercase font-bold tracking-widest">${top.id} • ${top.postCount} Items</p>
-                            </div>
-                        </div>
-                        <button onclick="handleSubToggle(this, '${top.id}', ${top.isSubscribed})" class="px-10 py-3 ${top.isSubscribed ? 'bg-zinc-700' : 'btn-brand'} text-white rounded-2xl font-black uppercase text-[10px] tracking-widest">
-                            ${top.isSubscribed ? 'Unsubscribe' : 'Subscribe'}
-                        </button>
-                    </div>
-                    <div class="grid gap-4">
-                        <h3 class="text-[10px] font-black uppercase opacity-40 ml-6 tracking-widest">Archives</h3>
-                        ${data.flatMap(t => t.posts).map(p => `
-                            <div class="glass p-6 rounded-3xl flex justify-between items-center group border border-transparent hover:border-brandOrange/30 transition-all">
-                                <div class="flex items-center gap-4">
-                                    <div class="w-12 h-12 bg-brandBlue/10 rounded-2xl flex items-center justify-center text-brandBlue">${p.type==='VIDEO'?'🎬':'📄'}</div>
-                                    <div>
-                                        <p class="font-bold text-sm">${p.title}</p>
-                                        <p class="text-[9px] opacity-40 uppercase font-bold tracking-widest">${top.name} • ${p.views || 0} Views</p>
-                                    </div>
-                                </div>
-                                <button onclick="openResource('${p.id}','${p.url}','${p.type}','${p.title}')" class="bg-brandOrange/10 text-brandOrange px-8 py-2 rounded-xl text-[10px] font-black uppercase">Open</button>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>`;
+            main.innerHTML = `<div class="space-y-10"><div class="glass p-8 rounded-[3rem] border border-brandOrange/20 flex flex-col md:flex-row justify-between items-center gap-6"><div class="flex items-center gap-6"><div class="w-16 h-16 btn-brand rounded-2xl flex items-center justify-center text-white text-3xl font-black">${top.name[0]}</div><div><h2 class="text-2xl font-black italic">${top.name}</h2><p class="text-[10px] opacity-60 uppercase font-bold tracking-widest">${top.id} • ${top.postCount} Items</p></div></div><button onclick="handleSubToggle(this, '${top.id}', ${top.isSubscribed})" class="px-10 py-3 ${top.isSubscribed ? 'bg-zinc-700' : 'btn-brand'} text-white rounded-2xl font-black uppercase text-[10px] tracking-widest">${top.isSubscribed ? 'Unsubscribe' : 'Subscribe'}</button></div><div class="grid gap-4"><h3 class="text-[10px] font-black uppercase opacity-40 ml-6 tracking-widest">Archives</h3>${data.flatMap(t => t.posts).map(p => `<div class="glass p-6 rounded-3xl flex justify-between items-center group border border-transparent hover:border-brandOrange/30 transition-all"><div class="flex items-center gap-4"><div class="w-12 h-12 bg-brandBlue/10 rounded-2xl flex items-center justify-center text-brandBlue">${p.type==='VIDEO'?'🎬':'📄'}</div><div><p class="font-bold text-sm">${p.title}</p><p class="text-[9px] opacity-40 uppercase font-bold tracking-widest">${top.name} • ${p.views || 0} Views</p></div></div><button onclick="openResource('${p.id}','${p.url}','${p.type}','${p.title}')" class="bg-brandOrange/10 text-brandOrange px-8 py-2 rounded-xl text-[10px] font-black uppercase">Open</button></div>`).join('')}</div></div>`;
         }
 
-        // SaaS Logic: Interactive Access Handshake
         async function openResource(id, url, type, title) {
-            const accessScreen = document.getElementById('access-screen');
-            accessScreen.classList.remove('hidden');
-            
-            // Simulating secure decryption/handshake
-            await new Promise(resolve => setTimeout(resolve, 1500));
-            
+            const screen = document.getElementById('access-screen');
+            screen.classList.remove('hidden');
+            await new Promise(r => setTimeout(r, 600)); // Optimized delay
             await api("track_view", { id });
             document.getElementById('vault-title').innerText = title.toUpperCase();
             let src = url;
@@ -288,67 +227,41 @@
                 let vid = url.includes('v=') ? url.split('v=')[1].split('&')[0] : url.split('/').pop();
                 src = `https://www.youtube.com/embed/${vid}?autoplay=1&modestbranding=1&rel=0`;
             } else if (url.includes('drive.google.com')) src = url.replace('/view', '/preview');
-            
             document.getElementById('vault-frame').src = src;
-            accessScreen.classList.add('hidden');
+            screen.classList.add('hidden');
             document.getElementById('media-vault').classList.remove('hidden');
-            toast("Access Decrypted Successfully");
         }
 
         async function handleSubToggle(btn, tId, isSubbed) {
             btn.innerHTML = `<div class="animate-spin rounded-full h-4 w-4 border-2 border-white/30 border-t-white mx-auto"></div>`;
-            const action = isSubbed ? "unsubscribe" : "subscribe";
-            await api(action, { studentEmail: user.email, teacherId: tId });
-            toast(isSubbed ? "Frequency Severed" : "Handshake Complete");
+            await api(isSubbed ? "unsubscribe" : "subscribe", { studentEmail: user.email, teacherId: tId });
             navigate('search', document.getElementById('g-search').value);
         }
 
         async function api(a, p={}, q="") {
-            try {
-                const r = await fetch(`${CONFIG.URL}?action=${a}&query=${q}&payload=${encodeURIComponent(JSON.stringify(p))}`);
-                return await r.json();
-            } catch(e) { return "Signal Error"; }
+            try { return await (await fetch(`${CONFIG.URL}?action=${a}&query=${q}&payload=${encodeURIComponent(JSON.stringify(p))}`)).json(); }
+            catch(e) { return "Error"; }
         }
 
         function renderFeed(data) {
             const f = document.getElementById('feed');
-            if (!data.length) { f.innerHTML = `<p class="text-center py-20 opacity-30 font-black uppercase text-[10px]">Zero Activity</p>`; return; }
-            f.innerHTML = data.map(i => `
-                <div class="glass p-8 rounded-[2.5rem] flex justify-between items-center group">
-                    <div class="flex items-center gap-6">
-                        <div class="w-14 h-14 bg-brandBlue/10 rounded-3xl flex items-center justify-center">${i.type==='VIDEO'?'🎬':'📄'}</div>
-                        <div>
-                            <p class="text-[9px] text-brandOrange font-black uppercase">${i.type}</p>
-                            <h4 class="font-black text-xl italic">${i.title}</h4>
-                            <p class="text-[9px] text-zinc-500 uppercase font-bold">${i.tName || 'Campus'} • ${i.views || 0} Secure Views</p>
-                        </div>
-                    </div>
-                    <button onclick="openResource('${i.id}','${i.url}','${i.type}','${i.title}')" class="bg-white text-black px-8 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest">Access</button>
-                </div>`).join('');
+            if (!data.length) { f.innerHTML = `<p class="text-center py-20 opacity-30 font-black uppercase text-[10px]">Silence</p>`; return; }
+            f.innerHTML = data.map(i => `<div class="glass p-8 rounded-[2.5rem] flex justify-between items-center group"><div class="flex items-center gap-6"><div class="w-14 h-14 bg-brandBlue/10 rounded-3xl flex items-center justify-center">${i.type==='VIDEO'?'🎬':'📄'}</div><div><p class="text-[9px] text-brandOrange font-black uppercase">${i.type}</p><h4 class="font-black text-xl italic">${i.title}</h4><p class="text-[9px] text-zinc-500 uppercase font-bold">${i.tName || 'Campus'} • ${i.views || 0} Secure Views</p></div></div><button onclick="openResource('${i.id}','${i.url}','${i.type}','${i.title}')" class="bg-white text-black px-8 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest">Access</button></div>`).join('');
         }
 
         async function publish() {
-            const t = document.getElementById('up-title').value;
-            const u = document.getElementById('up-url').value;
-            if(!t || !u) return toast("Empty Buffer");
+            const t = document.getElementById('up-title').value, u = document.getElementById('up-url').value;
+            if(!t || !u) return toast("Empty Archive");
             await api("upload", { teacherId: user.teacherId, teacherName: user.name, title: t, url: u, type: document.getElementById('up-type').value });
-            toast("Sync Success"); navigate('home');
+            toast("Resource Live"); navigate('home');
         }
 
         function closeVault() { document.getElementById('media-vault').classList.add('hidden'); document.getElementById('vault-frame').src = ""; }
         function logout() { localStorage.clear(); location.reload(); }
         function closeOtp() { document.getElementById('otp-modal').classList.add('hidden'); }
         function toggleAuthMode() { isSignup = !isSignup; document.getElementById('signup-fields').classList.toggle('hidden'); document.getElementById('toggle-auth-btn').innerText = isSignup ? "Log In" : "Sign Up"; }
-
-        window.onload = () => {
-            if (user) {
-                const page = history.state?.page || 'home';
-                const query = history.state?.query || '';
-                renderPage(page, query);
-            } else {
-                document.getElementById('auth-screen').classList.remove('hidden');
-            }
-        };
+        
+        window.onload = () => user ? navigate(history.state?.page || 'home', history.state?.query || '') : document.getElementById('auth-screen').classList.remove('hidden');
     </script>
 </body>
 </html>
