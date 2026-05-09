@@ -8,35 +8,35 @@
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <script>
-        tailwind.config = { darkMode: 'class', theme: { extend: { colors: { brandBlue: '#004a80', brandOrange: '#f7941d', offWhite: '#fdfbf7' } } } }
+        tailwind.config = { darkMode: 'class', theme: { extend: { colors: { brandBlue: '#004a80', brandOrange: '#f7941d' } } } }
     </script>
     <style>
-        :root { --text-main: #fdfbf7; --bg-main: #050505; --glass-bg: rgba(15, 15, 15, 0.9); --input-bg: #111; }
-        .light { --text-main: #002e50; --bg-main: #fdfbf7; --glass-bg: rgba(255, 255, 255, 0.85); --input-bg: #fff; }
+        :root { --text-main: #fdfbf7; --bg-main: #050505; --glass-bg: rgba(15, 15, 15, 0.9); }
+        .light { --text-main: #002e50; --bg-main: #fdfbf7; --glass-bg: rgba(255, 255, 255, 0.85); }
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg-main); color: var(--text-main); transition: 0.4s; overflow-x: hidden; }
         .glass { background: var(--glass-bg); backdrop-filter: blur(30px); border: 1px solid rgba(128,128,128,0.1); }
         .btn-brand { background: linear-gradient(135deg, #004a80 0%, #f7941d 100%); background-size: 200% auto; transition: 0.4s; color: white; font-weight: 800; text-transform: uppercase; }
         .btn-brand:hover { background-position: right center; transform: translateY(-1px); }
-        .input-field { background: var(--input-bg); border: 1px solid rgba(128,128,128,0.2); color: var(--text-main); outline: none; padding: 1rem; border-radius: 14px; width: 100%; }
-        #toast-box { position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%); z-index: 4000; display: flex; flex-direction: column; gap: 0.5rem; pointer-events: none; }
-        .toast-pill { background: #111; color: #fff; padding: 0.6rem 1.5rem; border-radius: 99px; border: 1px solid rgba(255,255,255,0.1); font-size: 10px; font-weight: 800; text-transform: uppercase; animation: popUp 0.3s forwards; }
-        @keyframes popUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .input-field { background: #111; border: 1px solid rgba(128,128,128,0.2); color: white; outline: none; padding: 1rem; border-radius: 14px; width: 100%; }
+        .light .input-field { background: #fff; color: #002e50; }
+        .skeleton { background: linear-gradient(90deg, rgba(128,128,128,0.05) 25%, rgba(128,128,128,0.1) 50%, rgba(128,128,128,0.05) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
+        @keyframes shimmer { 100% { background-position: -200% 0; } }
     </style>
 </head>
 <body class="selection:bg-brandOrange/30">
 
-    <div id="toast-box"></div>
+    <div id="toast-box" class="fixed bottom-8 left-1/2 -translate-x-1/2 z-[4000] flex flex-col gap-2 pointer-events-none"></div>
 
     <!-- Modals -->
     <div id="custom-modal" class="hidden fixed inset-0 z-[2500] bg-black/90 backdrop-blur-md flex items-center justify-center p-6">
         <div id="modal-content" class="w-full max-w-md glass p-10 rounded-[3rem] border border-brandOrange/20 shadow-2xl"></div>
     </div>
 
-    <!-- Media Vault -->
+    <!-- Media Viewer -->
     <div id="media-vault" class="hidden fixed inset-0 z-[2000] bg-black flex items-center justify-center">
-        <button onclick="closeVault()" class="absolute top-6 right-6 bg-white/10 hover:bg-red-500 text-white w-12 h-12 rounded-full flex items-center justify-center font-black z-[2100]">✕</button>
+        <button id="close-vault-btn" class="absolute top-6 right-6 bg-white/10 hover:bg-red-500 text-white w-12 h-12 rounded-full font-black z-[2100]">✕</button>
         <div class="w-full h-full flex items-center justify-center p-4">
-            <iframe id="vault-frame" class="w-full h-full max-w-7xl max-h-[90vh] border-none rounded-xl" allow="autoplay; fullscreen" allowfullscreen></iframe>
+            <iframe id="vault-frame" class="w-full h-full max-w-7xl max-h-[90vh] border-none rounded-xl bg-black" allowfullscreen></iframe>
         </div>
     </div>
 
@@ -44,9 +44,8 @@
         <!-- Auth Screen -->
         <div id="auth-screen" class="hidden min-h-screen flex items-center justify-center p-6">
             <div class="w-full max-w-md glass p-10 rounded-[3.5rem] text-center shadow-2xl">
-                <img src="https://res.cloudinary.com/dowhvdkjh/image/upload/v1777895769/IMG-20260504-WA0002_fucbjd.jpg" class="h-20 mx-auto mb-6 rounded-2xl" alt="Logo">
+                <img src="https://res.cloudinary.com/dowhvdkjh/image/upload/v1777895769/IMG-20260504-WA0002_fucbjd.jpg" class="h-20 mx-auto mb-6 rounded-2xl">
                 <h1 class="text-4xl font-black mb-8 italic">Open<span class="text-brandOrange">Class</span></h1>
-                
                 <div id="signup-fields" class="hidden space-y-4 mb-4">
                     <input type="text" id="reg-name" placeholder="Full Name" class="input-field">
                     <select id="reg-role" class="input-field">
@@ -54,33 +53,41 @@
                         <option value="teacher">Teacher Account</option>
                     </select>
                 </div>
-
                 <div class="space-y-4">
-                    <input type="email" id="auth-email" placeholder="Campus Email" class="input-field">
+                    <input type="email" id="auth-email" placeholder="Email" class="input-field">
                     <input type="password" id="auth-pass" placeholder="Password" class="input-field">
-                    <button onclick="handleAuth()" id="primary-btn" class="w-full py-4 btn-brand rounded-2xl shadow-xl">Sign In</button>
-                    
+                    <button id="primary-btn" class="w-full py-4 btn-brand rounded-2xl shadow-xl">Sign In</button>
                     <div class="flex items-center my-6 opacity-20"><hr class="flex-grow"> <span class="px-4 text-[10px] font-black">OR</span> <hr class="flex-grow"></div>
-                    
-                    <button onclick="handleGoogle()" class="w-full py-4 glass dark:text-white light:text-brandBlue rounded-2xl font-bold uppercase text-[10px] flex items-center justify-center gap-4 border border-zinc-500/20">
-                        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5" alt="G"> Continue with Google
+                    <button id="google-btn" class="w-full py-4 glass dark:text-white light:text-brandBlue rounded-2xl font-bold uppercase text-[10px] flex items-center justify-center gap-4 border border-zinc-500/20">
+                        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5"> Continue with Google
                     </button>
-
-                    <button onclick="toggleAuth()" id="toggle-btn" class="w-full text-[10px] text-zinc-500 font-bold uppercase mt-6 hover:text-brandOrange">Create New Profile</button>
+                    <button id="toggle-btn" class="w-full text-[10px] text-zinc-500 font-bold uppercase mt-6 hover:text-brandOrange">Create New Profile</button>
                 </div>
             </div>
         </div>
 
-        <!-- Verification Screen (RESTORED) -->
+        <!-- Verification Screen -->
         <div id="verify-screen" class="hidden min-h-screen flex items-center justify-center p-6">
-            <div class="w-full max-w-md glass p-10 rounded-[3.5rem] text-center border-brandOrange/20 shadow-2xl">
-                <h2 class="text-3xl font-black mb-4 italic">Verify Identity</h2>
-                <p id="verify-note" class="text-zinc-500 text-xs mb-8 uppercase font-bold tracking-widest leading-relaxed"></p>
-                <div class="space-y-6">
-                    <input type="number" id="otp-input" placeholder="000000" class="input-field text-center text-5xl font-black tracking-widest py-6">
-                    <button onclick="checkOTP()" class="w-full py-5 btn-brand rounded-2xl font-black uppercase shadow-xl">Verify Code</button>
-                    <button onclick="resendOTP()" class="text-[10px] font-black uppercase opacity-50 hover:opacity-100 hover:text-brandOrange">Resend Code</button>
-                    <button onclick="location.reload()" class="block w-full text-[9px] font-black uppercase opacity-30">Cancel</button>
+            <div class="w-full max-w-md glass p-10 rounded-[3.5rem] text-center border-brandOrange/20">
+                <h2 class="text-3xl font-black mb-4 italic">Verify OTP</h2>
+                <p id="verify-note" class="text-zinc-500 text-[10px] mb-8 uppercase font-bold tracking-widest"></p>
+                <input type="number" id="otp-input" placeholder="000000" class="input-field text-center text-5xl font-black mb-6 py-6">
+                <button id="verify-otp-btn" class="w-full py-5 btn-brand rounded-2xl shadow-xl">Verify Code</button>
+            </div>
+        </div>
+
+        <!-- Onboarding Screen -->
+        <div id="onboarding-screen" class="hidden min-h-screen flex items-center justify-center p-6">
+            <div class="w-full max-w-md glass p-10 rounded-[3.5rem] border-brandOrange/20 shadow-2xl">
+                <h2 class="text-3xl font-black mb-6 italic text-center">Setup Account</h2>
+                <div class="space-y-4">
+                    <input type="text" id="ob-name" placeholder="Full Name" class="input-field">
+                    <select id="ob-role" class="input-field">
+                        <option value="student">Student Account</option>
+                        <option value="teacher">Teacher Account</option>
+                    </select>
+                    <input type="password" id="ob-pass" placeholder="Create Security Password" class="input-field">
+                    <button id="finalize-btn" class="w-full py-5 btn-brand rounded-2xl shadow-xl">Join Campus</button>
                 </div>
             </div>
         </div>
@@ -89,292 +96,179 @@
         <div id="dashboard" class="hidden min-h-screen flex flex-col">
             <nav class="p-5 glass border-b border-white/5 sticky top-0 z-[1000] flex flex-col md:flex-row gap-6 justify-between px-10 items-center">
                 <div class="flex items-center gap-4">
-                    <img src="https://res.cloudinary.com/dowhvdkjh/image/upload/v1777895769/IMG-20260504-WA0002_fucbjd.jpg" class="h-10 rounded-xl cursor-pointer" onclick="navigate('home')">
-                    <h2 class="text-2xl font-black italic cursor-pointer tracking-tighter" onclick="navigate('home')">Open<span class="text-brandOrange">Class</span></h2>
+                    <img src="https://res.cloudinary.com/dowhvdkjh/image/upload/v1777895769/IMG-20260504-WA0002_fucbjd.jpg" class="h-10 rounded-xl cursor-pointer" id="nav-logo">
+                    <h2 class="text-2xl font-black italic cursor-pointer tracking-tighter" id="nav-title">Open<span class="text-brandOrange">Class</span></h2>
                 </div>
-                <div class="flex items-center gap-6 w-full md:w-auto relative">
-                    <div class="relative w-full md:w-96 group">
-                        <div class="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-brandOrange">
+                <div class="flex items-center gap-6 w-full md:w-auto">
+                    <div class="relative w-full md:w-80 group">
+                        <div class="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500">
                             <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="8" cy="8" r="6"/><path d="M13 13l4 4"/></svg>
                         </div>
-                        <input type="text" id="g-search" oninput="reactiveSearch(this.value)" placeholder="Search Instructors or Lessons..." class="input-field rounded-2xl pl-12 pr-6 py-2.5 text-sm w-full">
+                        <input type="text" id="g-search" placeholder="Search Teacher or Topic..." class="input-field rounded-2xl pl-12 py-2.5 text-sm">
                     </div>
-                    <button onclick="toggleMode()" class="p-2 glass rounded-xl">🌓</button>
+                    <button id="theme-toggle" class="p-2 glass rounded-xl">🌓</button>
                     <div id="nav-profile-pic" class="w-10 h-10 rounded-full border-2 border-brandOrange/30 overflow-hidden hidden md:block"></div>
-                    <button onclick="logout()" class="text-[10px] font-black text-red-500 uppercase px-4 py-2 border border-red-500/20 rounded-xl">Logout</button>
+                    <button id="logout-btn" class="text-[10px] font-black text-red-500 uppercase px-4 py-2 border border-red-500/20 rounded-xl">Logout</button>
                 </div>
             </nav>
             <main id="main-content" class="p-10 max-w-7xl mx-auto w-full flex-grow"></main>
         </div>
     </div>
 
-    <!-- Onboarding -->
-    <div id="onboarding-screen" class="hidden min-h-screen flex items-center justify-center p-6">
-        <div class="w-full max-w-md glass p-10 rounded-[3.5rem] border-brandOrange/20 shadow-2xl">
-            <h2 class="text-3xl font-black mb-6 italic text-center">Sync Profile</h2>
-            <div class="space-y-4">
-                <input type="text" id="ob-name" placeholder="Full Name" class="input-field w-full">
-                <select id="ob-role" class="input-field w-full">
-                    <option value="student">Student Account</option>
-                    <option value="teacher">Teacher Account</option>
-                </select>
-                <input type="password" id="ob-pass" placeholder="Create Security Password" class="input-field w-full">
-                <button onclick="finalizeProfile()" class="w-full py-5 btn-brand rounded-2xl shadow-xl">Complete Setup</button>
-            </div>
-        </div>
-    </div>
-
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup, updatePassword } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, collection, addDoc, query, where, getDocs, updateDoc, increment, deleteDoc, arrayUnion, arrayRemove, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+        import * as Core from "./app.js";
 
-        // --- PASTE YOUR FIREBASE CONFIG HERE ---
+        // Global State Variables
+        let profile = null;
+        let isSignup = false;
+        let otpCode = null;
+        let tempUser = null;
 
-        const firebaseConfig = {
-         apiKey: "AIzaSyAAtk7rWxT7VFKA6J1UVHicHSakceMc4TA",
-         authDomain: "openclass-565ca.firebaseapp.com",
-         projectId: "openclass-565ca",
-         storageBucket: "openclass-565ca.firebasestorage.app",
-         messagingSenderId: "43042586871",
-         appId: "1:43042586871:web:d35842d6f67d44c24fd3f2",
-         measurementId: "G-BR2YDKX6B4"
+        // --- AUTH LOGIC ---
+        const handleAuth = async () => {
+            const e = document.getElementById('auth-email').value;
+            const p = document.getElementById('auth-pass').value;
+            if (isSignup) {
+                tempUser = { e, p, n: document.getElementById('reg-name').value, r: document.getElementById('reg-role').value };
+                otpCode = Math.floor(100000 + Math.random() * 900000);
+                try {
+                    await Core.sendOTP(e, otpCode);
+                    document.getElementById('verify-note').innerText = `Code sent to ${e}`;
+                    showScreen('verify-screen');
+                } catch(err) { toast("Email Delivery Failed", "error"); }
+            } else {
+                try { await Core.signInWithEmailAndPassword(Core.auth, e, p); } catch(err) { toast(err.message, "error"); }
+            }
         };
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const provider = new GoogleAuthProvider();
-        emailjs.init("P88qoYcr5CHYVNAPw");
+        const verifyOTP = async () => {
+            if (document.getElementById('otp-input').value == otpCode) {
+                const { e, p, n, r } = tempUser;
+                const cred = await Core.createUserWithEmailAndPassword(Core.auth, e, p);
+                const tId = "OC-" + n.split(' ')[0].toUpperCase() + Math.floor(100+Math.random()*899);
+                await Core.setDoc(Core.doc(Core.db, "users", cred.user.uid), { 
+                    name: n, role: r, teacherId: tId, email: e, subs: [], joined: new Date().toLocaleDateString(), photo: "" 
+                });
+                toast("Verified!");
+            } else toast("Wrong Code", "error");
+        };
 
-        let profile = null, isSignup = false, otpCode = null, tempUser = null;
-
-        // Reactive Search Trigger
-        window.reactiveSearch = (val) => { if (val.length >= 2) navigate('search', val); };
-
-        window.onpopstate = (e) => { if (profile) renderContent(e.state?.p || 'home', e.state?.q || ''); };
-
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                const docSnap = await getDoc(doc(db, "users", user.uid));
-                if (!docSnap.exists()) showScreen('onboarding-screen');
-                else {
-                    profile = docSnap.data();
-                    if(profile.photo) document.getElementById('nav-profile-pic').innerHTML = `<img src="${profile.photo}" class="w-full h-full object-cover">`;
-                    document.getElementById('nav-profile-pic').classList.remove('hidden');
-                    showScreen('dashboard');
-                    const hash = window.location.hash.substring(1) || 'home';
-                    renderContent(hash);
-                }
-            } else showScreen('auth-screen');
-        });
-
-        window.navigate = (p, q = '') => { history.pushState({p, q}, '', `#${p}`); renderContent(p, q); };
-
-        async function renderContent(p, q) {
-            if (p === 'home') loadHome();
-            else if (p === 'search') loadSearch(q);
-            else if (p === 'profile') viewTeacher(q);
-        }
-
-        // --- DASHBOARD LOGIC ---
-        window.loadHome = async () => {
+        // --- DASHBOARD RENDERING ---
+        const loadHome = async () => {
             const main = document.getElementById('main-content');
             if (profile.role === 'teacher') {
-                const contentSnap = await getDocs(query(collection(db, "content"), where("tId", "==", profile.teacherId)));
-                const followersSnap = await getDocs(query(collection(db, "users"), where("subs", "array-contains", profile.teacherId)));
-                
-                main.innerHTML = `
-                <div class="grid lg:grid-cols-3 gap-10">
+                // Teacher Logic: Stats + Upload
+                main.innerHTML = `<div class="grid lg:grid-cols-3 gap-10">
                     <div class="space-y-6 lg:sticky lg:top-32 h-fit">
-                        <div class="glass p-8 rounded-[3rem] border border-brandOrange/20 shadow-xl text-center">
-                            <img src="${profile.photo || ''}" class="w-24 h-24 mx-auto mb-4 rounded-full border-2 border-brandOrange p-1 object-cover bg-brandBlue">
+                        <div class="glass p-8 rounded-[3rem] border border-brandOrange/20 text-center">
+                            <img src="${profile.photo || ''}" class="w-24 h-24 mx-auto mb-4 rounded-full border-2 border-brandOrange p-1 object-cover">
                             <h3 class="text-xl font-black italic">${profile.name}</h3>
-                            <p class="text-[10px] font-bold opacity-40 uppercase tracking-widest mb-6">${profile.teacherId}</p>
-                            <div class="grid grid-cols-2 gap-4">
-                                <div class="bg-white/5 p-4 rounded-3xl text-center"><p class="text-[9px] opacity-30 uppercase font-bold">Followers</p><p class="text-2xl font-black">${followersSnap.size}</p></div>
-                                <div class="bg-white/5 p-4 rounded-3xl text-center"><p class="text-[9px] opacity-30 uppercase font-bold">Resources</p><p class="text-2xl font-black">${contentSnap.size}</p></div>
-                            </div>
+                            <p class="text-[10px] font-black opacity-40 uppercase tracking-widest">${profile.teacherId}</p>
                         </div>
                         <div class="glass p-8 rounded-[3rem]">
-                            <input id="up-t" placeholder="Resource Title" class="input-field mb-3"><input id="up-u" placeholder="Media URL" class="input-field mb-3">
+                            <input id="up-t" placeholder="Title" class="input-field mb-3">
+                            <input id="up-u" placeholder="Link" class="input-field mb-3">
                             <select id="up-y" class="input-field mb-6"><option value="video">Video</option><option value="file">File</option></select>
-                            <button onclick="publish()" class="w-full py-4 btn-brand rounded-2xl shadow-xl">Post Live</button>
+                            <button id="publish-btn" class="w-full py-4 btn-brand rounded-2xl">Publish</button>
                         </div>
                     </div>
                     <div id="feed" class="lg:col-span-2 space-y-6"></div>
                 </div>`;
-                renderFeed(contentSnap.docs, true);
+                document.getElementById('publish-btn').onclick = publishContent;
+                const snap = await Core.getDocs(Core.query(Core.collection(Core.db, "content"), Core.where("tId", "==", profile.teacherId)));
+                renderFeed(snap.docs, true);
             } else {
+                // Student Logic: Feed
                 main.innerHTML = `<div id="feed" class="max-w-3xl mx-auto space-y-6"></div>`;
-                if (!profile.subs?.length) {
-                    document.getElementById('feed').innerHTML = `<div class="text-center py-20 opacity-20 font-black tracking-widest uppercase">Connect with instructors to see lessons</div>`;
-                } else {
-                    const snap = await getDocs(query(collection(db, "content"), where("tId", "in", profile.subs)));
+                if (profile.subs?.length) {
+                    const snap = await Core.getDocs(Core.query(Core.collection(Core.db, "content"), Core.where("tId", "in", profile.subs)));
                     renderFeed(snap.docs, false);
+                } else {
+                    document.getElementById('feed').innerHTML = `<div class="text-center py-20 opacity-20 font-black">FOLLOW TEACHERS TO SEE CONTENT</div>`;
                 }
             }
         };
 
-        // --- AUTH & OTP LOGIC ---
-        window.handleAuth = async () => {
-            const e = document.getElementById('auth-email').value, p = document.getElementById('auth-pass').value;
-            if(isSignup) { 
-                tempUser = { e, p, n: document.getElementById('reg-name').value, r: document.getElementById('reg-role').value }; 
-                resendOTP(); 
-            }
-            else try { await signInWithEmailAndPassword(auth, e, p); } catch(err) { toast(err.message, "error"); }
-        };
-
-        window.resendOTP = async () => {
-            otpCode = Math.floor(100000 + Math.random() * 900000);
-            const email = tempUser ? tempUser.e : document.getElementById('auth-email').value;
-            try {
-                await emailjs.send("service_djr1n0f", "template_tiqnb53", { to_email: email, otp: otpCode });
-                document.getElementById('verify-note').innerText = `Sent to ${email}`;
-                showScreen('verify-screen');
-                toast("Verification Email Sent");
-            } catch (err) { console.error("EmailJS Error:", err); toast("Email Delivery Failed", "error"); }
-        };
-
-        window.checkOTP = async () => {
-            if (document.getElementById('otp-input').value == otpCode) {
-                try {
-                    const { e, p, n, r } = tempUser;
-                    const cred = await createUserWithEmailAndPassword(auth, e, p);
-                    const tId = "OC-" + n.split(' ')[0].toUpperCase() + Math.floor(100+Math.random()*899);
-                    await setDoc(doc(db, "users", cred.user.uid), { name: n, role: r, teacherId: tId, email: e, subs: [], joined: new Date().toLocaleDateString(), photo: '' });
-                    toast("Verified!");
-                } catch(err) { toast(err.message, "error"); }
-            } else toast("Code Mismatch", "error");
-        };
-
-        // --- RESOURCE HELPERS ---
-        function getThumbnail(url) {
-            let id = '';
-            try {
-                if(url.includes('v=')) id = url.split('v=')[1].split('&')[0];
-                else if(url.includes('youtu.be/')) id = url.split('/').pop().split('?')[0];
-                else if(url.includes('/shorts/')) id = url.split('/shorts/')[1].split('?')[0];
-                return id ? `https://img.youtube.com/vi/${id}/mqdefault.jpg` : 'https://res.cloudinary.com/dowhvdkjh/image/upload/v1777895769/IMG-20260504-WA0002_fucbjd.jpg';
-            } catch(e) { return 'https://res.cloudinary.com/dowhvdkjh/image/upload/v1777895769/IMG-20260504-WA0002_fucbjd.jpg'; }
-        }
-
-        function renderResourceCard(d, isT) {
-            const i = d.data();
-            return `
-                <div class="glass p-5 rounded-[2.5rem] flex flex-col md:flex-row justify-between items-center group shadow-xl gap-6">
-                    <div class="flex items-center gap-6 w-full md:w-auto">
-                        <div class="w-32 h-20 rounded-2xl overflow-hidden bg-brandBlue/10 flex-shrink-0 border border-white/5">
-                            <img src="${getThumbnail(i.url)}" class="w-full h-full object-cover">
-                        </div>
-                        <div class="truncate">
-                            <p class="text-[9px] text-brandOrange font-black uppercase tracking-widest">${i.type}</p>
-                            <h4 class="font-black text-lg italic truncate">${i.title}</h4>
-                            <p class="text-[9px] opacity-40 uppercase font-bold tracking-widest">${i.tName} • ${i.views || 0} Views</p>
+        const renderFeed = (docs, isTeacher) => {
+            const feed = document.getElementById('feed');
+            feed.innerHTML = docs.map(d => {
+                const data = d.data();
+                return `<div class="glass p-6 rounded-[2.5rem] flex flex-col md:flex-row justify-between items-center gap-6">
+                    <div class="flex items-center gap-6">
+                        <img src="${Core.getThumbnail(data.url)}" class="w-32 h-20 rounded-2xl object-cover border border-white/5">
+                        <div>
+                            <p class="text-[9px] text-brandOrange font-black uppercase tracking-widest">${data.type}</p>
+                            <h4 class="font-black text-lg italic">${data.title}</h4>
+                            <p class="text-[9px] opacity-40 uppercase font-bold">${data.tName} • ${data.views || 0} Views</p>
                         </div>
                     </div>
-                    <div class="flex gap-3 w-full md:w-auto">
-                        <button onclick="openResource('${d.id}','${i.url}','${i.title}')" class="flex-grow md:flex-grow-0 bg-white text-black px-10 py-3 rounded-2xl font-black text-[10px] uppercase shadow-lg">Open</button>
-                        ${isT ? `
-                            <button onclick="openEdit('${d.id}', '${i.title}', '${i.url}')" class="p-3 bg-zinc-800 rounded-xl hover:text-brandOrange">✎</button>
-                            <button onclick="openDelete('${d.id}')" class="p-3 bg-zinc-800 rounded-xl hover:text-red-500">🗑</button>
-                        ` : ''}
+                    <div class="flex gap-2">
+                        <button onclick="openResource('${d.id}','${data.url}','${data.title}')" class="bg-white text-black px-8 py-3 rounded-2xl font-black text-[10px] uppercase">Open</button>
                     </div>
                 </div>`;
+            }).join('');
+        };
+
+        const publishContent = async () => {
+            const t = document.getElementById('up-t').value;
+            const u = document.getElementById('up-u').value;
+            const y = document.getElementById('up-y').value;
+            await Core.addDoc(Core.collection(Core.db, "content"), { 
+                title: t, url: u, type: y, tId: profile.teacherId, tName: profile.name, views: 0, date: Core.serverTimestamp() 
+            });
+            loadHome();
+        };
+
+        // --- GLOBAL SETUP ---
+        Core.onAuthStateChanged(Core.auth, async (user) => {
+            if (user) {
+                const docSnap = await Core.getDoc(Core.doc(Core.db, "users", user.uid));
+                if (!docSnap.exists()) showScreen('onboarding-screen');
+                else {
+                    profile = docSnap.data();
+                    if(profile.photo) document.getElementById('nav-profile-pic').innerHTML = `<img src="${profile.photo}" class="w-full h-full object-cover">`;
+                    showScreen('dashboard');
+                    loadHome();
+                }
+            } else showScreen('auth-screen');
+        });
+
+        // Binding buttons
+        document.getElementById('primary-btn').onclick = handleAuth;
+        document.getElementById('google-btn').onclick = () => Core.signInWithPopup(Core.auth, Core.provider);
+        document.getElementById('toggle-btn').onclick = () => { 
+            isSignup = !isSignup; 
+            document.getElementById('signup-fields').classList.toggle('hidden'); 
+            document.getElementById('toggle-btn').innerText = isSignup ? "Already have an account? Login" : "Create New Profile";
+        };
+        document.getElementById('verify-otp-btn').onclick = verifyOTP;
+        document.getElementById('logout-btn').onclick = () => Core.signOut(Core.auth).then(() => location.reload());
+        document.getElementById('theme-toggle').onclick = () => document.documentElement.classList.toggle('light');
+        document.getElementById('close-vault-btn').onclick = () => { document.getElementById('media-vault').classList.add('hidden'); document.getElementById('vault-frame').src = ""; };
+
+        // UI Utilities
+        function showScreen(id) {
+            ['auth-screen', 'verify-screen', 'onboarding-screen', 'dashboard'].forEach(s => document.getElementById(s).classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden');
+        }
+        function toast(m) {
+            const b = document.getElementById('toast-box');
+            const d = document.createElement('div');
+            d.className = 'glass px-6 py-3 rounded-full text-[10px] font-black uppercase border-brandOrange/30';
+            d.innerText = m;
+            b.appendChild(d);
+            setTimeout(() => d.remove(), 2500);
         }
 
+        // Global functions for HTML onclick
         window.openResource = async (id, url, title) => {
-            await updateDoc(doc(db, "content", id), { views: increment(1) });
+            await Core.updateDoc(Core.doc(Core.db, "content", id), { views: Core.increment(1) });
             let src = url;
             if(url.includes('v=')) src = `https://www.youtube.com/embed/${url.split('v=')[1].split('&')[0]}?autoplay=1`;
-            else if(url.includes('youtu.be/')) src = `https://www.youtube.com/embed/${url.split('/').pop()}?autoplay=1`;
             document.getElementById('vault-frame').src = src;
             document.getElementById('media-vault').classList.remove('hidden');
         };
 
-        window.publish = async () => {
-            const t = document.getElementById('up-t').value, u = document.getElementById('up-u').value, y = document.getElementById('up-y').value;
-            await addDoc(collection(db, "content"), { title: t, url: u, type: y, tId: profile.teacherId, tName: profile.name, views: 0, date: serverTimestamp() });
-            loadHome();
-        };
-
-        // --- SHARED UI ---
-        window.loadSearch = async (q) => {
-            const main = document.getElementById('main-content');
-            const userSnap = await getDocs(collection(db, "users"));
-            const teachers = userSnap.docs.filter(d => d.data().role === 'teacher' && (d.data().name.toLowerCase().includes(q.toLowerCase()) || d.data().teacherId === q));
-            const contentSnap = await getDocs(collection(db, "content"));
-            const content = contentSnap.docs.filter(d => d.data().title.toLowerCase().includes(q.toLowerCase()));
-            main.innerHTML = `<div class="space-y-12">
-                ${teachers.map(m => `<div onclick="navigate('profile', '${m.data().teacherId}')" class="glass p-8 rounded-[3rem] flex justify-between items-center cursor-pointer hover:border-brandOrange/40 transition-all group">
-                    <div class="flex items-center gap-6"><img src="${m.data().photo || ''}" class="w-16 h-16 rounded-2xl object-cover bg-brandBlue">
-                    <div><h3 class="text-2xl font-black italic">${m.data().name}</h3><p class="text-[10px] opacity-30 font-bold">${m.data().teacherId}</p></div></div>
-                    <p class="text-[10px] font-black text-brandOrange uppercase">Profile →</p></div>`).join('')}
-                ${content.map(d => renderResourceCard(d, false)).join('')}</div>`;
-        };
-
-        window.viewTeacher = async (teacherId) => {
-            const main = document.getElementById('main-content');
-            const userQuery = query(collection(db, "users"), where("teacherId", "==", teacherId));
-            const userSnap = await getDocs(userQuery);
-            if (userSnap.empty) return navigate('home');
-            const tData = userSnap.docs[0].data(), tUid = userSnap.docs[0].id;
-            const contentSnap = await getDocs(query(collection(db, "content"), where("tId", "==", teacherId)));
-            const followersSnap = await getDocs(query(collection(db, "users"), where("subs", "array-contains", teacherId)));
-            const isFollowing = profile.subs && profile.subs.includes(teacherId);
-            main.innerHTML = `
-                <div class="space-y-10">
-                    <div class="glass p-10 rounded-[4rem] border border-brandOrange/20 flex flex-col md:flex-row justify-between items-center gap-10 shadow-2xl">
-                        <div class="flex items-center gap-8"><img src="${tData.photo || ''}" class="w-24 h-24 rounded-[2.5rem] object-cover bg-brandBlue shadow-2xl">
-                        <div><h2 class="text-4xl font-black italic tracking-tighter">${tData.name}</h2><p class="text-sm font-bold text-brandOrange tracking-widest uppercase opacity-60">${tData.teacherId}</p></div></div>
-                        <div class="flex items-center gap-10"><div class="flex gap-8"><div class="text-center"><p class="text-[9px] opacity-40 uppercase">Subs</p><p class="text-3xl font-black">${followersSnap.size}</p></div>
-                        <div class="text-center"><p class="text-[9px] opacity-40 uppercase">Posts</p><p class="text-3xl font-black">${contentSnap.size}</p></div></div>
-                        <button onclick="handleSub('${teacherId}', ${isFollowing})" class="px-10 py-4 ${isFollowing ? 'bg-zinc-800' : 'btn-brand'} rounded-2xl font-black text-xs uppercase shadow-xl transition-all">${isFollowing ? 'Unfollow' : 'Follow'}</button></div>
-                    </div>
-                    <div class="grid gap-6">${contentSnap.docs.map(d => renderResourceCard(d, false)).join('')}</div>
-                </div>`;
-        };
-
-        window.handleSub = async (tId, isFollowing) => {
-            const userRef = doc(db, "users", auth.currentUser.uid);
-            await updateDoc(userRef, { subs: isFollowing ? arrayRemove(tId) : arrayUnion(tId) });
-            profile.subs = isFollowing ? profile.subs.filter(id => id !== tId) : [...(profile.subs || []), tId];
-            viewTeacher(tId);
-        };
-
-        window.openEdit = (id, t, u) => {
-            document.getElementById('custom-modal').innerHTML = `<div class="p-4 space-y-4">
-                <h3 class="text-xl font-black italic text-brandOrange">Modify Resource</h3>
-                <input id="edit-t" value="${t}" class="input-field"><input id="edit-u" value="${u}" class="input-field">
-                <div class="flex gap-3"><button onclick="closeModal()" class="flex-1 py-4 bg-zinc-800 rounded-2xl font-black text-xs">CANCEL</button>
-                <button onclick="saveEdit('${id}')" class="flex-1 py-4 btn-brand rounded-2xl font-black text-xs">SAVE</button></div></div>`;
-            document.getElementById('custom-modal').classList.remove('hidden');
-        };
-
-        window.saveEdit = async (id) => { await updateDoc(doc(db, "content", id), { title: document.getElementById('edit-t').value, url: document.getElementById('edit-u').value }); closeModal(); loadHome(); };
-        window.confirmDel = async (id) => { await deleteDoc(doc(db, "content", id)); closeModal(); loadHome(); };
-        window.openDelete = (id) => { document.getElementById('custom-modal').innerHTML = `<div class="p-6 text-center space-y-6"><h3 class="text-2xl font-black italic text-red-500">Delete Permanently?</h3><div class="flex gap-4"><button onclick="closeModal()" class="flex-1 py-4 bg-zinc-800 rounded-2xl">NO</button><button onclick="confirmDel('${id}')" class="flex-1 py-4 bg-red-600 rounded-2xl">YES</button></div></div>`; document.getElementById('custom-modal').classList.remove('hidden'); };
-        
-        window.finalizeProfile = async () => {
-            const n = document.getElementById('ob-name').value, r = document.getElementById('ob-role').value, p = document.getElementById('ob-pass').value;
-            if(!p) return toast("Password Required", "error");
-            await updatePassword(auth.currentUser, p);
-            const tId = "OC-" + n.split(' ')[0].toUpperCase() + Math.floor(100+Math.random()*899);
-            await setDoc(doc(db, "users", auth.currentUser.uid), { name: n, role: r, teacherId: tId, email: auth.currentUser.email, subs: [], joined: new Date().toLocaleDateString(), photo: auth.currentUser.photoURL || '' });
-            location.reload();
-        };
-
-        window.handleGoogle = async () => { try { await signInWithPopup(auth, provider); } catch (err) { toast(err.message, "error"); } };
-        window.logout = () => signOut(auth).then(() => location.reload());
-        window.toggleAuth = () => { isSignup = !isSignup; document.getElementById('signup-fields').classList.toggle('hidden'); document.getElementById('primary-btn').innerText = isSignup ? "Verify & Join" : "Sign In"; document.getElementById('toggle-btn').innerText = isSignup ? "Already have an account? Login" : "Create New Profile"; };
-        window.toggleMode = () => { document.documentElement.classList.toggle('light'); localStorage.setItem('oc_theme', document.documentElement.classList.contains('light') ? 'light' : 'dark'); };
-        window.closeVault = () => { document.getElementById('media-vault').classList.add('hidden'); document.getElementById('vault-frame').src=""; };
-        window.closeModal = () => document.getElementById('custom-modal').classList.add('hidden');
-        function showScreen(id) { ['auth-screen','verify-screen','onboarding-screen','dashboard'].forEach(s => document.getElementById(s).classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); }
-        function renderFeed(docs, isT) { document.getElementById('feed').innerHTML = docs.map(d => renderResourceCard(d, isT)).join(''); }
-        function toast(m, t="s") { const b = document.getElementById('toast-box'); const d = document.createElement('div'); d.className='toast-pill'; d.innerText=m; b.appendChild(d); setTimeout(()=>d.remove(), 2500); }
-        if(localStorage.getItem('oc_theme') === 'light') document.documentElement.classList.add('light');
     </script>
 </body>
 </html>
