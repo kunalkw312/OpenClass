@@ -3,32 +3,26 @@ import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, on
 import { getFirestore, doc, setDoc, getDoc, collection, addDoc, query, where, getDocs, updateDoc, increment, deleteDoc, arrayUnion, arrayRemove, serverTimestamp, orderBy } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 import { firebaseConfig, emailConfig } from "./config.js";
 
-// Initialize Services
+// Initialize
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const provider = new GoogleAuthProvider();
 
-// Initialize EmailJS
 emailjs.init(emailConfig.publicKey);
 
-// Utility: YouTube Thumbnail Logic
-export function getThumbnail(url) {
-    try {
-        let id = '';
-        if(url.includes('v=')) id = url.split('v=')[1].split('&')[0];
-        else if(url.includes('youtu.be/')) id = url.split('/').pop().split('?')[0];
-        else if(url.includes('/shorts/')) id = url.split('/shorts/')[1].split('?')[0];
-        return id ? `https://img.youtube.com/vi/${id}/mqdefault.jpg` : 'https://res.cloudinary.com/dowhvdkjh/image/upload/v1777895769/IMG-20260504-WA0002_fucbjd.jpg';
-    } catch(e) { return 'https://res.cloudinary.com/dowhvdkjh/image/upload/v1777895769/IMG-20260504-WA0002_fucbjd.jpg'; }
-}
-
-// Utility: EmailJS OTP Sender
 export async function sendOTP(email, code) {
     return await emailjs.send(emailConfig.serviceID, emailConfig.templateID, { to_email: email, otp: code });
 }
 
-// Re-exporting Firestore/Auth methods for UI use
+export function getThumbnail(url) {
+    let id = '';
+    if(url.includes('v=')) id = url.split('v=')[1].split('&')[0];
+    else if(url.includes('youtu.be/')) id = url.split('/').pop().split('?')[0];
+    else if(url.includes('/shorts/')) id = url.split('/shorts/')[1].split('?')[0];
+    return id ? `https://img.youtube.com/vi/${id}/mqdefault.jpg` : 'https://res.cloudinary.com/dowhvdkjh/image/upload/v1777895769/IMG-20260504-WA0002_fucbjd.jpg';
+}
+
 export { 
     doc, setDoc, getDoc, collection, addDoc, query, where, getDocs, updateDoc, 
     increment, deleteDoc, arrayUnion, arrayRemove, serverTimestamp, orderBy,
