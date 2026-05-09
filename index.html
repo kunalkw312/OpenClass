@@ -13,31 +13,19 @@
     <style>
         :root { --text-main: #fdfbf7; --bg-main: #050505; --glass-bg: rgba(15, 15, 15, 0.9); }
         .light { --text-main: #002e50; --bg-main: #fdfbf7; --glass-bg: rgba(255, 255, 255, 0.85); }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg-main); color: var(--text-main); transition: 0.4s; overflow-x: hidden; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg-main); color: var(--text-main); transition: 0.4s; }
         .glass { background: var(--glass-bg); backdrop-filter: blur(30px); border: 1px solid rgba(128,128,128,0.1); }
-        .btn-brand { background: linear-gradient(135deg, #004a80 0%, #f7941d 100%); background-size: 200% auto; transition: 0.4s; color: white; font-weight: 800; text-transform: uppercase; }
-        .btn-brand:hover { background-position: right center; transform: translateY(-1px); }
+        .btn-brand { background: linear-gradient(135deg, #004a80 0%, #f7941d 100%); color: white; font-weight: 800; text-transform: uppercase; }
         .input-field { background: #111; border: 1px solid rgba(128,128,128,0.2); color: white; outline: none; padding: 1rem; border-radius: 14px; width: 100%; }
         .light .input-field { background: #fff; color: #002e50; }
-        .skeleton { background: linear-gradient(90deg, rgba(128,128,128,0.05) 25%, rgba(128,128,128,0.1) 50%, rgba(128,128,128,0.05) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
-        @keyframes shimmer { 100% { background-position: -200% 0; } }
     </style>
 </head>
-<body class="selection:bg-brandOrange/30">
-
+<body>
     <div id="toast-box" class="fixed bottom-8 left-1/2 -translate-x-1/2 z-[4000] flex flex-col gap-2 pointer-events-none"></div>
 
-    <!-- Modals -->
-    <div id="custom-modal" class="hidden fixed inset-0 z-[2500] bg-black/90 backdrop-blur-md flex items-center justify-center p-6">
-        <div id="modal-content" class="w-full max-w-md glass p-10 rounded-[3rem] border border-brandOrange/20 shadow-2xl"></div>
-    </div>
-
-    <!-- Media Viewer -->
     <div id="media-vault" class="hidden fixed inset-0 z-[2000] bg-black flex items-center justify-center">
-        <button id="close-vault-btn" class="absolute top-6 right-6 bg-white/10 hover:bg-red-500 text-white w-12 h-12 rounded-full font-black z-[2100]">✕</button>
-        <div class="w-full h-full flex items-center justify-center p-4">
-            <iframe id="vault-frame" class="w-full h-full max-w-7xl max-h-[90vh] border-none rounded-xl bg-black" allowfullscreen></iframe>
-        </div>
+        <button id="close-vault-btn" class="absolute top-6 right-6 bg-white/10 text-white w-12 h-12 rounded-full font-black z-[2100]">✕</button>
+        <iframe id="vault-frame" class="w-full h-full max-w-7xl max-h-[90vh] border-none rounded-xl bg-black" allowfullscreen></iframe>
     </div>
 
     <div id="app">
@@ -56,30 +44,29 @@
                 <div class="space-y-4">
                     <input type="email" id="auth-email" placeholder="Email" class="input-field">
                     <input type="password" id="auth-pass" placeholder="Password" class="input-field">
-                    <button id="primary-btn" class="w-full py-4 btn-brand rounded-2xl shadow-xl">Sign In</button>
-                    <div class="flex items-center my-6 opacity-20"><hr class="flex-grow"> <span class="px-4 text-[10px] font-black">OR</span> <hr class="flex-grow"></div>
+                    <button id="primary-btn" class="w-full py-4 btn-brand rounded-2xl">Sign In</button>
                     <button id="google-btn" class="w-full py-4 glass dark:text-white light:text-brandBlue rounded-2xl font-bold uppercase text-[10px] flex items-center justify-center gap-4 border border-zinc-500/20">
                         <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5"> Continue with Google
                     </button>
-                    <button id="toggle-btn" class="w-full text-[10px] text-zinc-500 font-bold uppercase mt-6 hover:text-brandOrange">Create New Profile</button>
+                    <button id="toggle-btn" class="w-full text-[10px] text-zinc-500 font-bold uppercase mt-6">Create New Profile</button>
                 </div>
             </div>
         </div>
 
-        <!-- Verification Screen -->
-        <div id="verify-screen" class="hidden min-h-screen flex items-center justify-center p-6">
-            <div class="w-full max-w-md glass p-10 rounded-[3.5rem] text-center border-brandOrange/20">
-                <h2 class="text-3xl font-black mb-4 italic">Verify OTP</h2>
+        <!-- Verification -->
+        <div id="verify-screen" class="hidden min-h-screen flex items-center justify-center p-6 text-center">
+            <div class="w-full max-w-md glass p-10 rounded-[3.5rem]">
+                <h2 class="text-3xl font-black mb-4 italic">Verify Identity</h2>
                 <p id="verify-note" class="text-zinc-500 text-[10px] mb-8 uppercase font-bold tracking-widest"></p>
                 <input type="number" id="otp-input" placeholder="000000" class="input-field text-center text-5xl font-black mb-6 py-6">
                 <button id="verify-otp-btn" class="w-full py-5 btn-brand rounded-2xl shadow-xl">Verify Code</button>
             </div>
         </div>
 
-        <!-- Onboarding Screen -->
+        <!-- Onboarding -->
         <div id="onboarding-screen" class="hidden min-h-screen flex items-center justify-center p-6">
             <div class="w-full max-w-md glass p-10 rounded-[3.5rem] border-brandOrange/20 shadow-2xl">
-                <h2 class="text-3xl font-black mb-6 italic text-center">Setup Account</h2>
+                <h2 class="text-3xl font-black mb-6 italic text-center">Setup Profile</h2>
                 <div class="space-y-4">
                     <input type="text" id="ob-name" placeholder="Full Name" class="input-field">
                     <select id="ob-role" class="input-field">
@@ -87,23 +74,17 @@
                         <option value="teacher">Teacher Account</option>
                     </select>
                     <input type="password" id="ob-pass" placeholder="Create Security Password" class="input-field">
-                    <button id="finalize-btn" class="w-full py-5 btn-brand rounded-2xl shadow-xl">Join Campus</button>
+                    <button id="finalize-btn" class="w-full py-5 btn-brand rounded-2xl">Join Campus</button>
                 </div>
             </div>
         </div>
 
         <!-- Dashboard -->
         <div id="dashboard" class="hidden min-h-screen flex flex-col">
-            <nav class="p-5 glass border-b border-white/5 sticky top-0 z-[1000] flex flex-col md:flex-row gap-6 justify-between px-10 items-center">
-                <div class="flex items-center gap-4">
-                    <img src="https://res.cloudinary.com/dowhvdkjh/image/upload/v1777895769/IMG-20260504-WA0002_fucbjd.jpg" class="h-10 rounded-xl cursor-pointer" id="nav-logo">
-                    <h2 class="text-2xl font-black italic cursor-pointer tracking-tighter" id="nav-title">Open<span class="text-brandOrange">Class</span></h2>
-                </div>
-                <div class="flex items-center gap-6 w-full md:w-auto">
-                    <div class="relative w-full md:w-80 group">
-                        <div class="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500">
-                            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="8" cy="8" r="6"/><path d="M13 13l4 4"/></svg>
-                        </div>
+            <nav class="p-5 glass border-b border-white/5 sticky top-0 z-[1000] flex justify-between items-center px-10">
+                <h2 class="text-2xl font-black italic tracking-tighter cursor-pointer" id="nav-logo">Open<span class="text-brandOrange">Class</span></h2>
+                <div class="flex items-center gap-6">
+                    <div class="relative w-80 group">
                         <input type="text" id="g-search" placeholder="Search Teacher or Topic..." class="input-field rounded-2xl pl-12 py-2.5 text-sm">
                     </div>
                     <button id="theme-toggle" class="p-2 glass rounded-xl">🌓</button>
@@ -118,108 +99,25 @@
     <script type="module">
         import * as Core from "./app.js";
 
-        // Global State Variables
         let profile = null;
         let isSignup = false;
         let otpCode = null;
         let tempUser = null;
 
-        // --- AUTH LOGIC ---
-        const handleAuth = async () => {
-            const e = document.getElementById('auth-email').value;
-            const p = document.getElementById('auth-pass').value;
-            if (isSignup) {
-                tempUser = { e, p, n: document.getElementById('reg-name').value, r: document.getElementById('reg-role').value };
-                otpCode = Math.floor(100000 + Math.random() * 900000);
-                try {
-                    await Core.sendOTP(e, otpCode);
-                    document.getElementById('verify-note').innerText = `Code sent to ${e}`;
-                    showScreen('verify-screen');
-                } catch(err) { toast("Email Delivery Failed", "error"); }
-            } else {
-                try { await Core.signInWithEmailAndPassword(Core.auth, e, p); } catch(err) { toast(err.message, "error"); }
-            }
+        // Navigation Engine
+        window.navigate = (p, q = '') => {
+            history.pushState({p, q}, '', `#${p}`);
+            renderContent(p, q);
         };
 
-        const verifyOTP = async () => {
-            if (document.getElementById('otp-input').value == otpCode) {
-                const { e, p, n, r } = tempUser;
-                const cred = await Core.createUserWithEmailAndPassword(Core.auth, e, p);
-                const tId = "OC-" + n.split(' ')[0].toUpperCase() + Math.floor(100+Math.random()*899);
-                await Core.setDoc(Core.doc(Core.db, "users", cred.user.uid), { 
-                    name: n, role: r, teacherId: tId, email: e, subs: [], joined: new Date().toLocaleDateString(), photo: "" 
-                });
-                toast("Verified!");
-            } else toast("Wrong Code", "error");
-        };
-
-        // --- DASHBOARD RENDERING ---
-        const loadHome = async () => {
+        async function renderContent(p, q) {
             const main = document.getElementById('main-content');
-            if (profile.role === 'teacher') {
-                // Teacher Logic: Stats + Upload
-                main.innerHTML = `<div class="grid lg:grid-cols-3 gap-10">
-                    <div class="space-y-6 lg:sticky lg:top-32 h-fit">
-                        <div class="glass p-8 rounded-[3rem] border border-brandOrange/20 text-center">
-                            <img src="${profile.photo || ''}" class="w-24 h-24 mx-auto mb-4 rounded-full border-2 border-brandOrange p-1 object-cover">
-                            <h3 class="text-xl font-black italic">${profile.name}</h3>
-                            <p class="text-[10px] font-black opacity-40 uppercase tracking-widest">${profile.teacherId}</p>
-                        </div>
-                        <div class="glass p-8 rounded-[3rem]">
-                            <input id="up-t" placeholder="Title" class="input-field mb-3">
-                            <input id="up-u" placeholder="Link" class="input-field mb-3">
-                            <select id="up-y" class="input-field mb-6"><option value="video">Video</option><option value="file">File</option></select>
-                            <button id="publish-btn" class="w-full py-4 btn-brand rounded-2xl">Publish</button>
-                        </div>
-                    </div>
-                    <div id="feed" class="lg:col-span-2 space-y-6"></div>
-                </div>`;
-                document.getElementById('publish-btn').onclick = publishContent;
-                const snap = await Core.getDocs(Core.query(Core.collection(Core.db, "content"), Core.where("tId", "==", profile.teacherId)));
-                renderFeed(snap.docs, true);
-            } else {
-                // Student Logic: Feed
-                main.innerHTML = `<div id="feed" class="max-w-3xl mx-auto space-y-6"></div>`;
-                if (profile.subs?.length) {
-                    const snap = await Core.getDocs(Core.query(Core.collection(Core.db, "content"), Core.where("tId", "in", profile.subs)));
-                    renderFeed(snap.docs, false);
-                } else {
-                    document.getElementById('feed').innerHTML = `<div class="text-center py-20 opacity-20 font-black">FOLLOW TEACHERS TO SEE CONTENT</div>`;
-                }
-            }
-        };
+            if (p === 'home') loadHome();
+            else if (p === 'search') loadSearch(q || document.getElementById('g-search').value);
+            else if (p === 'profile') viewTeacher(q);
+        }
 
-        const renderFeed = (docs, isTeacher) => {
-            const feed = document.getElementById('feed');
-            feed.innerHTML = docs.map(d => {
-                const data = d.data();
-                return `<div class="glass p-6 rounded-[2.5rem] flex flex-col md:flex-row justify-between items-center gap-6">
-                    <div class="flex items-center gap-6">
-                        <img src="${Core.getThumbnail(data.url)}" class="w-32 h-20 rounded-2xl object-cover border border-white/5">
-                        <div>
-                            <p class="text-[9px] text-brandOrange font-black uppercase tracking-widest">${data.type}</p>
-                            <h4 class="font-black text-lg italic">${data.title}</h4>
-                            <p class="text-[9px] opacity-40 uppercase font-bold">${data.tName} • ${data.views || 0} Views</p>
-                        </div>
-                    </div>
-                    <div class="flex gap-2">
-                        <button onclick="openResource('${d.id}','${data.url}','${data.title}')" class="bg-white text-black px-8 py-3 rounded-2xl font-black text-[10px] uppercase">Open</button>
-                    </div>
-                </div>`;
-            }).join('');
-        };
-
-        const publishContent = async () => {
-            const t = document.getElementById('up-t').value;
-            const u = document.getElementById('up-u').value;
-            const y = document.getElementById('up-y').value;
-            await Core.addDoc(Core.collection(Core.db, "content"), { 
-                title: t, url: u, type: y, tId: profile.teacherId, tName: profile.name, views: 0, date: Core.serverTimestamp() 
-            });
-            loadHome();
-        };
-
-        // --- GLOBAL SETUP ---
+        // Auth Observer
         Core.onAuthStateChanged(Core.auth, async (user) => {
             if (user) {
                 const docSnap = await Core.getDoc(Core.doc(Core.db, "users", user.uid));
@@ -228,47 +126,71 @@
                     profile = docSnap.data();
                     if(profile.photo) document.getElementById('nav-profile-pic').innerHTML = `<img src="${profile.photo}" class="w-full h-full object-cover">`;
                     showScreen('dashboard');
-                    loadHome();
+                    const hash = window.location.hash.substring(1) || 'home';
+                    renderContent(hash);
                 }
             } else showScreen('auth-screen');
         });
 
-        // Binding buttons
-        document.getElementById('primary-btn').onclick = handleAuth;
+        // Event Bindings
+        document.getElementById('primary-btn').onclick = async () => {
+            const e = document.getElementById('auth-email').value;
+            const p = document.getElementById('auth-pass').value;
+            if (isSignup) {
+                tempUser = { e, p, n: document.getElementById('reg-name').value, r: document.getElementById('reg-role').value };
+                otpCode = Math.floor(100000 + Math.random() * 900000);
+                await Core.sendOTP(e, otpCode);
+                document.getElementById('verify-note').innerText = `Sent to ${e}`;
+                showScreen('verify-screen');
+            } else {
+                try { await Core.signInWithEmailAndPassword(Core.auth, e, p); } catch(err) { alert(err.message); }
+            }
+        };
+
         document.getElementById('google-btn').onclick = () => Core.signInWithPopup(Core.auth, Core.provider);
-        document.getElementById('toggle-btn').onclick = () => { 
-            isSignup = !isSignup; 
-            document.getElementById('signup-fields').classList.toggle('hidden'); 
+        document.getElementById('toggle-btn').onclick = () => {
+            isSignup = !isSignup;
+            document.getElementById('signup-fields').classList.toggle('hidden');
             document.getElementById('toggle-btn').innerText = isSignup ? "Already have an account? Login" : "Create New Profile";
         };
-        document.getElementById('verify-otp-btn').onclick = verifyOTP;
+        document.getElementById('verify-otp-btn').onclick = async () => {
+            if (document.getElementById('otp-input').value == otpCode) {
+                const { e, p, n, r } = tempUser;
+                const cred = await Core.createUserWithEmailAndPassword(Core.auth, e, p);
+                const tId = "OC-" + n.split(' ')[0].toUpperCase() + Math.floor(100+Math.random()*899);
+                await Core.setDoc(Core.doc(Core.db, "users", cred.user.uid), { 
+                    name: n, role: r, teacherId: tId, email: e, subs: [], joined: new Date().toLocaleDateString(), photo: "" 
+                });
+            }
+        };
         document.getElementById('logout-btn').onclick = () => Core.signOut(Core.auth).then(() => location.reload());
         document.getElementById('theme-toggle').onclick = () => document.documentElement.classList.toggle('light');
-        document.getElementById('close-vault-btn').onclick = () => { document.getElementById('media-vault').classList.add('hidden'); document.getElementById('vault-frame').src = ""; };
+        document.getElementById('nav-logo').onclick = () => navigate('home');
 
-        // UI Utilities
         function showScreen(id) {
             ['auth-screen', 'verify-screen', 'onboarding-screen', 'dashboard'].forEach(s => document.getElementById(s).classList.add('hidden'));
             document.getElementById(id).classList.remove('hidden');
         }
-        function toast(m) {
-            const b = document.getElementById('toast-box');
-            const d = document.createElement('div');
-            d.className = 'glass px-6 py-3 rounded-full text-[10px] font-black uppercase border-brandOrange/30';
-            d.innerText = m;
-            b.appendChild(d);
-            setTimeout(() => d.remove(), 2500);
+
+        async function loadHome() {
+            const main = document.getElementById('main-content');
+            if (profile.role === 'teacher') {
+                main.innerHTML = `<div class="grid lg:grid-cols-3 gap-10">
+                    <div class="glass p-8 rounded-[3rem] h-fit">
+                        <input id="up-t" placeholder="Title" class="input-field mb-3"><input id="up-u" placeholder="URL" class="input-field mb-6">
+                        <button id="pub-btn" class="w-full py-4 btn-brand rounded-2xl">Publish</button>
+                    </div>
+                    <div id="feed" class="lg:col-span-2 space-y-4"></div>
+                </div>`;
+                document.getElementById('pub-btn').onclick = async () => {
+                    await Core.addDoc(Core.collection(Core.db, "content"), { 
+                        title: document.getElementById('up-t').value, url: document.getElementById('up-u').value, 
+                        tId: profile.teacherId, tName: profile.name, date: Core.serverTimestamp(), views: 0 
+                    });
+                    loadHome();
+                };
+            }
         }
-
-        // Global functions for HTML onclick
-        window.openResource = async (id, url, title) => {
-            await Core.updateDoc(Core.doc(Core.db, "content", id), { views: Core.increment(1) });
-            let src = url;
-            if(url.includes('v=')) src = `https://www.youtube.com/embed/${url.split('v=')[1].split('&')[0]}?autoplay=1`;
-            document.getElementById('vault-frame').src = src;
-            document.getElementById('media-vault').classList.remove('hidden');
-        };
-
     </script>
 </body>
 </html>
