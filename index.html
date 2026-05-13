@@ -186,6 +186,7 @@
                             <button onclick="switchTeacherView('create')" class="w-full py-3 rounded-xl bg-white/5 text-[10px] font-black uppercase hover:bg-brandOrange">Create Hub</button>
                             <button onclick="switchTeacherView('course')" class="w-full py-3 rounded-xl bg-white/5 text-[10px] font-black uppercase hover:bg-brandOrange">Launch Course</button>
                             <button onclick="switchTeacherView('requests')" class="w-full py-3 rounded-xl bg-white/5 text-[10px] font-black uppercase hover:bg-brandOrange">Moderation</button>
+                            <button onclick="switchTeacherView('publish')" class="w-full py-3 rounded-xl bg-white/5 text-[10px] font-black uppercase hover:bg-brandOrange">Publish</button>
                         </div>
                         <div id="teacher-action-area" class="glass p-6 rounded-[2rem] space-y-4">
                             <h3 class="text-xs font-black italic text-brandOrange uppercase">Publish Quick Content</h3>
@@ -267,6 +268,29 @@
                 let html = '';
                 groups.forEach(g => { const d = g.data(); if(d.pending?.length) d.pending.forEach(p => { html += `<div class="bg-white/5 p-4 rounded-xl flex flex-col gap-2 border border-white/5"><div><p class="text-[8px] text-brandOrange font-black">${d.name}</p><p class="font-bold text-[10px]">${p.name}</p></div><div class="flex gap-2"><button onclick="modReq('${g.id}','${p.uid}','${p.name}',true)" class="flex-1 py-1.5 bg-green-600 rounded-lg text-[8px] font-black">Accept</button><button onclick="modReq('${g.id}','${p.uid}','${p.name}',false)" class="flex-1 py-1.5 bg-red-600 rounded-lg text-[8px] font-black">Deny</button></div></div>`; }); });
                 document.getElementById('request-list').innerHTML = html || '<p class="opacity-30 text-[9px] text-center font-bold">No Requests</p>';
+            }
+            else if (v === 'publish') {
+                area.innerHTML = `
+                <h3 class="text-xs font-black italic text-brandOrange uppercase">
+                    Publish Quick Content
+                </h3>
+            
+                <input id="up-t" placeholder="Resource Title"
+                class="input-field text-xs p-3 mb-2">
+            
+                <input id="up-u" placeholder="URL"
+                class="input-field text-xs p-3 mb-2">
+            
+                <select id="up-y" class="input-field text-xs p-3 mb-4">
+                    <option value="video">Recorded Video</option>
+                    <option value="live">Live Stream</option>
+                    <option value="file">Study Material</option>
+                </select>
+            
+                <button onclick="publishContent()"
+                class="w-full py-3 btn-brand text-xs">
+                    Publish
+                </button>`;
             }
         };
 
