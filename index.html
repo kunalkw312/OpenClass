@@ -183,12 +183,12 @@
                             </div>
                         </div>
                         <div class="glass p-4 rounded-[2rem] grid grid-cols-2 gap-3 border border-black/10">
-                        <div class="glass p-4 rounded-[2rem] grid grid-cols-2 gap-0 border border-black/10">
-                            <button onclick="switchTeacherView('create')" class="h-28 rounded-tl-2xl border border-black/20 bg-white text-black text-[11px] font-black uppercase hover:border-brandBlue transition-all">Create Hub</button>
-                            <button onclick="switchTeacherView('course')" class="h-28 rounded-tr-2xl border border-black/20 bg-white text-black text-[11px] font-black uppercase hover:border-brandBlue transition-all">Launch Course</button>
-                            <button onclick="switchTeacherView('requests')" class="h-28 rounded-bl-2xl border border-black/20 bg-white text-black text-[11px] font-black uppercase hover:border-brandBlue transition-all">Moderation</button>
-                            <button onclick="switchTeacherView('publish')" class="h-28 rounded-br-2xl border border-black/20 bg-white text-black text-[11px] font-black uppercase hover:border-brandBlue transition-all">Publish</button>
-                            </div>
+                        <div class="glass p-4 rounded-[2rem] flex flex-col gap-2">
+                            <button onclick="switchTeacherView('create')" class="w-full py-3 rounded-xl bg-white/5 text-[10px] font-black uppercase hover:bg-brandOrange">Create Hub</button>
+                            <button onclick="switchTeacherView('course')" class="w-full py-3 rounded-xl bg-white/5 text-[10px] font-black uppercase hover:bg-brandOrange">Launch Course</button>
+                            <button onclick="switchTeacherView('requests')" class="w-full py-3 rounded-xl bg-white/5 text-[10px] font-black uppercase hover:bg-brandOrange">Moderation</button>
+                            <button onclick="switchTeacherView('publish')" class="w-full py-3 rounded-xl bg-white/5 text-[10px] font-black uppercase hover:bg-brandOrange">Publish</button>
+                        </div>
                         <div id="teacher-action-area" class="glass p-6 rounded-[2rem] space-y-4">
                             <h3 class="text-xs font-black italic text-brandOrange uppercase">Publish Quick Content</h3>
                             <input id="up-t" placeholder="Resource Title" class="input-field text-xs p-3">
