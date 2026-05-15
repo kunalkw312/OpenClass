@@ -260,7 +260,7 @@
                         renderFeed(subContent.docs, false, 'feed');
                     }
                 } else if (currentTab === 'groups') {
-                    box.innerHTML = `<div class="glass p-8 rounded-[3rem] mb-10"><h3 class="text-2xl font-black mb-4">Join Hub</h3><div class="flex gap-4"><input id="hub-code" placeholder="OC-XXXXXX" class="input-field"><button onclick="joinGroup()" class="btn-brand px-10">Join</button></div></div><div id="student-groups" class="space-y-4"></div>`;
+                    box.innerHTML = `<div class="glass p-8 rounded-[3rem] mb-10"><h3 class="text-2xl font-black mb-4">Join Hub</h3><div class="flex gap-4"><input id="hub-code" placeholder="HUB-XXXXXX" class="input-field"><button onclick="joinGroup()" class="btn-brand px-10">Join</button></div></div><div id="student-groups" class="space-y-4"></div>`;
                     loadGroups();
                 } else if (currentTab === 'courses') {
                     const coSnap = await Core.getDocs(Core.collection(Core.db, "courses"));
