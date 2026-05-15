@@ -114,6 +114,14 @@
                         <input type="text" id="g-search" oninput="reactiveSearch(this.value)" placeholder="Search campus..." class="input-field rounded-2xl pl-12 pr-6 py-2.5 text-sm w-full">
                     </div>
                     <button onclick="toggleMode()" class="p-2 glass rounded-xl">🌓</button>
+
+                    //Notification Button
+                    <div class="relative">
+                    <button onclick="nbox.classList.toggle('hidden')" class="p-2 glass rounded-xl relative">🔔<span id="ncount" class="absolute -top-1 -right-1 bg-red-500 text-white text-[8px] w-4 h-4 rounded-full hidden flex items-center justify-center">0</span></button>
+                    <div id="nbox" class="hidden absolute right-0 top-14 w-72 glass rounded-2xl p-4">
+                    <div id="nlist" class="space-y-2 text-xs"></div>
+                    </div>
+                    </div>
                     <div id="nav-profile-pic" onclick="openProfileEdit()" class="w-10 h-10 rounded-full border-2 overflow-hidden hidden md:block cursor-pointer"></div>                    <button onclick="logout()" class="text-[10px] font-black text-red-500 uppercase px-4 py-2 border border-red-500/20 rounded-xl">Logout</button>
                 </div>
             </nav>
@@ -513,7 +521,7 @@
                     const pic = document.getElementById('nav-profile-pic');
                     if (profile.photo) pic.innerHTML = `<img src="${profile.photo}" class="w-full h-full object-cover">`;
                     pic.className = `w-10 h-10 rounded-full border-2 overflow-hidden hidden md:block ${profile.role === 'teacher' ? 'border-brandBlue' : 'border-brandOrange'}`;
-                    showScreen('dashboard'); navigate(window.location.hash.substring(1) || 'home');
+                    showScreen('dashboard'); navigate(window.location.hash.substring(1) || 'home'); loadNotifications();
                 }
             } else showScreen('auth-screen');
         });
@@ -546,6 +554,7 @@
         //ProfileEditOption
         window.openProfileEdit=()=>{document.getElementById('modal-content').innerHTML=`<div class="relative bg-white text-[#002e50] p-2 rounded-[2rem]"><button onclick="document.getElementById('custom-modal').classList.add('hidden')" class="absolute right-2 top-0 text-3xl">×</button><h3 class="text-2xl font-black mb-6">Edit Profile</h3><input id="edit-name" value="${profile.name||''}" placeholder="Name" class="input-field mb-4"><input type="file" id="edit-photo" accept="image/*" class="input-field mb-6"><div class="flex gap-4"><button onclick="document.getElementById('custom-modal').classList.add('hidden')" class="w-1/2 py-4 rounded-2xl border font-black">Cancel</button><button onclick="saveProfileEdit()" class="w-1/2 py-4 btn-brand">Save</button></div></div>`;document.getElementById('custom-modal').classList.remove('hidden')}
         window.saveProfileEdit=async()=>{let n=document.getElementById('edit-name').value,f=document.getElementById('edit-photo').files[0],p=profile.photo;if(f){p=await new Promise(r=>{let reader=new FileReader();reader.onload=()=>r(reader.result);reader.readAsDataURL(f)})}await Core.updateDoc(Core.doc(Core.db,"users",Core.auth.currentUser.uid),{name:n,photo:p});profile.name=n;profile.photo=p;document.getElementById('custom-modal').classList.add('hidden');document.getElementById('nav-profile-pic').innerHTML=`<img src="${p}" class="w-full h-full object-cover">`;loadHome();toast("Updated")}
+        async function loadNotifications(){let s=await Core.getDocs(Core.query(Core.collection(Core.db,"groups"),Core.where("teacherId","==",profile.teacherId))),h='',c=0;s.forEach(d=>d.data().pending?.forEach(p=>{c++;h+=`<div class="bg-white/5 p-3 rounded-xl">${p.name} requested to join</div>`}));nlist.innerHTML=h||'No notifications';ncount.innerText=c;c?ncount.classList.remove('hidden'):ncount.classList.add('hidden')}
         window.onclick = (e) => { if (e.target === document.getElementById('custom-modal')) document.getElementById('custom-modal').classList.add('hidden'); };
     </script>
 </body>
