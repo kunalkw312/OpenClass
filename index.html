@@ -30,6 +30,7 @@
         .plyr--full-ui.plyr--video .plyr__control--overlaid { background: #f7941d; }
         .plyr--video .plyr__controls { background: linear-gradient(transparent, rgba(0,0,0,0.8)); border-radius: 0 0 14px 14px; }
         .grid-btn-active { background: rgba(247, 148, 29, 0.2) !important; border: 1px solid rgba(247, 148, 29, 0.3) !important; color: #f7941d !important; }
+        .dot-badge{position:absolute;top:6px;right:8px;width:9px;height:9px;background:red;border-radius:999px;display:none}.has-dot .dot-badge{display:block}.tab-btn,.teacher-grid-btn{position:relative}
         @keyframes popUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
@@ -103,8 +104,8 @@
                 
                 <div class="flex gap-1 glass p-1 rounded-2xl">
                     <button id="tab-home" onclick="setTab('home')" class="tab-btn active">Home</button>
-                    <button id="tab-groups" onclick="setTab('groups')" class="tab-btn">Groups</button>
-                    <button id="tab-courses" onclick="setTab('courses')" class="tab-btn">Courses</button>
+                    <button id="tab-groups" onclick="setTab('groups')" class="tab-btn">Groups<span id="dot-groups" class="dot-badge"></span></button>
+                    <button id="tab-courses" onclick="setTab('courses')" class="tab-btn">Courses<span id="dot-courses" class="dot-badge"></span></button>
                     <button id="tab-content" onclick="setTab('content')" class="tab-btn">Content</button>
                 </div>
 
@@ -225,7 +226,7 @@
                         <div class="grid grid-cols-2 gap-2 glass p-4 rounded-[2rem]">
                             <button id="btn-create" onclick="switchTeacherView('create')" class="teacher-grid-btn p-4 rounded-xl bg-white/5 text-[9px] font-black uppercase transition-all">Hub Setup</button>
                             <button id="btn-course" onclick="switchTeacherView('course')" class="teacher-grid-btn p-4 rounded-xl bg-white/5 text-[9px] font-black uppercase transition-all">Launch Course</button>
-                            <button id="btn-requests" onclick="switchTeacherView('requests')" class="teacher-grid-btn p-4 rounded-xl bg-white/5 text-[9px] font-black uppercase transition-all">Requests</button>
+                            <button id="btn-requests" onclick="switchTeacherView('requests')" class="teacher-grid-btn p-4 rounded-xl bg-white/5 text-[9px] font-black uppercase transition-all">Requests<span id="dot-requests" class="dot-badge"></span></button>
                             <button id="btn-publish" onclick="switchTeacherView('publish')" class="teacher-grid-btn p-4 rounded-xl bg-white/5 text-[9px] font-black uppercase transition-all grid-btn-active">Publish</button>
                         </div>
                         <div id="teacher-action-area" class="glass p-6 rounded-[2rem] space-y-4">
@@ -383,6 +384,7 @@
             if (d.type === 'public') await Core.updateDoc(Core.doc(Core.db, "groups", g.id), { members: Core.arrayUnion(Core.auth.currentUser.uid) });
             else await Core.updateDoc(Core.doc(Core.db, "groups", g.id), { pending: Core.arrayUnion({ uid: Core.auth.currentUser.uid, name: profile.name }) });
             toast("Requested"); loadHome();
+            loadNotifications();
         };
 
         window.openResource = async (id, url, title) => {
@@ -424,6 +426,7 @@
             // Auto Join Linked Community Hub
             await Core.updateDoc(Core.doc(Core.db, "groups", gid), { members: Core.arrayUnion(Core.auth.currentUser.uid) });
             toast("Payment Simulated! Enrolled in Course and Hub.");
+            loadNotifications();
             document.getElementById('custom-modal').classList.add('hidden');
         };
 
@@ -508,6 +511,7 @@
             await Core.updateDoc(Core.doc(Core.db, "users", Core.auth.currentUser.uid), { subs: isF ? Core.arrayRemove(tId) : Core.arrayUnion(tId) });
             profile.subs = isF ? profile.subs.filter(i => i !== tId) : [...(profile.subs||[]), tId];
             viewTeacher(tId);
+            loadNotifications();
         };
 
         Core.onAuthStateChanged(Core.auth, async (user) => {
@@ -552,7 +556,7 @@
         //ProfileEditOption
         window.openProfileEdit=()=>{document.getElementById('modal-content').innerHTML=`<div class="relative bg-white text-[#002e50] p-2 rounded-[2rem]"><button onclick="document.getElementById('custom-modal').classList.add('hidden')" class="absolute right-2 top-0 text-3xl">×</button><h3 class="text-2xl font-black mb-6">Edit Profile</h3><input id="edit-name" value="${profile.name||''}" placeholder="Name" class="input-field mb-4"><input type="file" id="edit-photo" accept="image/*" class="input-field mb-6"><div class="flex gap-4"><button onclick="document.getElementById('custom-modal').classList.add('hidden')" class="w-1/2 py-4 rounded-2xl border font-black">Cancel</button><button onclick="saveProfileEdit()" class="w-1/2 py-4 btn-brand">Save</button></div></div>`;document.getElementById('custom-modal').classList.remove('hidden')}
         window.saveProfileEdit=async()=>{let n=document.getElementById('edit-name').value,f=document.getElementById('edit-photo').files[0],p=profile.photo;if(f){p=await new Promise(r=>{let reader=new FileReader();reader.onload=()=>r(reader.result);reader.readAsDataURL(f)})}await Core.updateDoc(Core.doc(Core.db,"users",Core.auth.currentUser.uid),{name:n,photo:p});profile.name=n;profile.photo=p;document.getElementById('custom-modal').classList.add('hidden');document.getElementById('nav-profile-pic').innerHTML=`<img src="${p}" class="w-full h-full object-cover">`;loadHome();toast("Updated")}
-        async function loadNotifications(){let s=await Core.getDocs(Core.query(Core.collection(Core.db,"groups"),Core.where("teacherId","==",profile.teacherId))),h='',c=0;s.forEach(d=>d.data().pending?.forEach(p=>{c++;h+=`<div class="bg-white/5 p-3 rounded-xl">${p.name} requested to join</div>`}));nlist.innerHTML=h||'No notifications';ncount.innerText=c;c?ncount.classList.remove('hidden'):ncount.classList.add('hidden')}
+        async function loadNotifications(){if(!profile)return;let h='',c=0,req=0,enroll=0,follow=0;if(profile.role==='teacher'){let gs=await Core.getDocs(Core.query(Core.collection(Core.db,"groups"),Core.where("teacherId","==",profile.teacherId)));gs.forEach(d=>d.data().pending?.forEach(p=>{req++;c++;h+=`<div class="bg-white/5 p-3 rounded-xl">📩 ${p.name} requested to join group</div>`}));let us=await Core.getDocs(Core.query(Core.collection(Core.db,"users"),Core.where("subs","array-contains",profile.teacherId)));follow=us.size;c+=follow;if(follow)h+=`<div class="bg-white/5 p-3 rounded-xl">👤 ${follow} students follow you</div>`;}let myGroups=await Core.getDocs(Core.collection(Core.db,"groups"));myGroups.forEach(d=>{let g=d.data();if(g.members?.includes(Core.auth.currentUser.uid)){enroll++;}});if(enroll&&profile.role==='student'){c+=enroll;h+=`<div class="bg-white/5 p-3 rounded-xl">🎓 You joined ${enroll} course/group hubs</div>`;}nlist.innerHTML=h||'No notifications';ncount.innerText=c;c?ncount.classList.remove('hidden'):ncount.classList.add('hidden');document.getElementById('tab-groups')?.classList.toggle('has-dot',req>0||enroll>0);document.getElementById('tab-courses')?.classList.toggle('has-dot',enroll>0);document.getElementById('btn-requests')?.classList.toggle('has-dot',req>0);}
         window.onclick = (e) => { if (e.target === document.getElementById('custom-modal')) document.getElementById('custom-modal').classList.add('hidden'); };
     </script>
 </body>
