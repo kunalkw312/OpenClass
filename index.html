@@ -104,8 +104,8 @@
                 
                 <div class="flex gap-1 glass p-1 rounded-2xl">
                     <button id="tab-home" onclick="setTab('home')" class="tab-btn active">Home</button>
-                    <button id="tab-groups" onclick="setTab('groups')" class="tab-btn">Groups<span id="dot-groups" class="dot-badge"></span></button>
-                    <button id="tab-courses" onclick="setTab('courses')" class="tab-btn">Courses<span id="dot-courses" class="dot-badge"></span></button>
+                    <button id="tab-groups" onclick="clearDot('groups');setTab('groups')" class="tab-btn">Groups<span id="dot-groups" class="dot-badge"></span></button>
+                    <button id="tab-courses" onclick="clearDot('courses');setTab('courses')" class="tab-btn">Courses<span id="dot-courses" class="dot-badge"></span></button>
                     <button id="tab-content" onclick="setTab('content')" class="tab-btn">Content</button>
                 </div>
 
@@ -227,7 +227,7 @@
                         <div class="grid grid-cols-2 gap-2 glass p-4 rounded-[2rem]">
                             <button id="btn-create" onclick="switchTeacherView('create')" class="teacher-grid-btn p-4 rounded-xl bg-white/5 text-[9px] font-black uppercase transition-all">Hub Setup</button>
                             <button id="btn-course" onclick="switchTeacherView('course')" class="teacher-grid-btn p-4 rounded-xl bg-white/5 text-[9px] font-black uppercase transition-all">Launch Course</button>
-                            <button id="btn-requests" onclick="switchTeacherView('requests')" class="teacher-grid-btn p-4 rounded-xl bg-white/5 text-[9px] font-black uppercase transition-all">Requests<span id="dot-requests" class="dot-badge"></span></button>
+                            <button id="btn-requests" onclick="clearDot('requests');switchTeacherView('requests')" class="teacher-grid-btn p-4 rounded-xl bg-white/5 text-[9px] font-black uppercase transition-all">Requests<span id="dot-requests" class="dot-badge"></span></button>
                             <button id="btn-publish" onclick="switchTeacherView('publish')" class="teacher-grid-btn p-4 rounded-xl bg-white/5 text-[9px] font-black uppercase transition-all grid-btn-active">Publish</button>
                         </div>
                         <div id="teacher-action-area" class="glass p-6 rounded-[2rem] space-y-4">
@@ -531,6 +531,7 @@
 
         window.toggleAIChat = () => document.getElementById('ai-chat-window').classList.toggle('hidden');
         window.closeGroupChat = () => document.getElementById('group-chat-window').classList.add('hidden');
+        window.clearDot=(type)=>{if(type==='groups')document.getElementById('tab-groups')?.classList.remove('has-dot');if(type==='courses')document.getElementById('tab-courses')?.classList.remove('has-dot');if(type==='requests')document.getElementById('btn-requests')?.classList.remove('has-dot')}
         let notificationsChecked=false;
         window.toggleNotifications=()=>{if(nbox.classList.contains('hidden')){nbox.classList.remove('hidden');if(notificationsChecked){nlist.innerHTML='<div class="text-center text-zinc-500 py-6 font-bold text-xs">✨ All caught up</div>';ncount.innerText='0';ncount.classList.add('hidden');}}else{nbox.classList.add('hidden');notificationsChecked=true;document.getElementById('tab-groups')?.classList.remove('has-dot');document.getElementById('tab-courses')?.classList.remove('has-dot');document.getElementById('btn-requests')?.classList.remove('has-dot');ncount.innerText='0';ncount.classList.add('hidden');}}
         window.toggleMode=()=>{document.documentElement.classList.toggle('light');document.documentElement.classList.toggle('dark');localStorage.setItem('oc_theme',document.documentElement.classList.contains('light'))};
