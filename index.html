@@ -531,7 +531,8 @@
 
         window.toggleAIChat = () => document.getElementById('ai-chat-window').classList.toggle('hidden');
         window.closeGroupChat = () => document.getElementById('group-chat-window').classList.add('hidden');
-        window.toggleNotifications=()=>{nbox.classList.toggle('hidden');if(!nbox.classList.contains('hidden')){setTimeout(()=>{document.getElementById('tab-groups')?.classList.remove('has-dot');document.getElementById('tab-courses')?.classList.remove('has-dot');document.getElementById('btn-requests')?.classList.remove('has-dot');nlist.innerHTML='<div class="text-center text-zinc-500 py-6 font-bold text-xs">Inbox Empty</div>';ncount.innerText='0';ncount.classList.add('hidden');},2500)}}
+        let notificationsChecked=false;
+        window.toggleNotifications=()=>{if(nbox.classList.contains('hidden')){nbox.classList.remove('hidden');if(notificationsChecked){nlist.innerHTML='<div class="text-center text-zinc-500 py-6 font-bold text-xs">✨ All caught up</div>';ncount.innerText='0';ncount.classList.add('hidden');}}else{nbox.classList.add('hidden');notificationsChecked=true;document.getElementById('tab-groups')?.classList.remove('has-dot');document.getElementById('tab-courses')?.classList.remove('has-dot');document.getElementById('btn-requests')?.classList.remove('has-dot');ncount.innerText='0';ncount.classList.add('hidden');}}
         window.toggleMode=()=>{document.documentElement.classList.toggle('light');document.documentElement.classList.toggle('dark');localStorage.setItem('oc_theme',document.documentElement.classList.contains('light'))};
         window.closeVault = () => { document.getElementById('media-vault').classList.add('hidden'); currentVideoContext = null; if(videoPlayer) videoPlayer.destroy(); };
         function showScreen(id) { ['auth-screen', 'verify-screen', 'onboarding-screen', 'dashboard'].forEach(s => document.getElementById(s).classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); }
