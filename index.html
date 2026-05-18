@@ -117,7 +117,7 @@
                     
                     <div class="relative">
                     <button onclick="toggleMode()" class="p-2 glass rounded-xl">🌓</button>
-                    <button onclick="nbox.classList.toggle('hidden')" class="p-2 glass rounded-xl relative">🔔<span id="ncount" class="absolute -top-1 -right-1 bg-red-500 text-white text-[8px] w-4 h-4 rounded-full hidden flex items-center justify-center">0</span></button>
+                    <button onclick="toggleNotifications()" class="p-2 glass rounded-xl relative">🔔<span id="ncount" class="absolute -top-1 -right-1 bg-red-500 text-white text-[8px] w-4 h-4 rounded-full hidden flex items-center justify-center">0</span></button>
                     <div id="nbox" class="hidden absolute right-0 top-14 w-72 glass rounded-2xl p-4">
                     <div id="nlist" class="space-y-2 text-xs"></div>
                     </div>
@@ -531,6 +531,7 @@
 
         window.toggleAIChat = () => document.getElementById('ai-chat-window').classList.toggle('hidden');
         window.closeGroupChat = () => document.getElementById('group-chat-window').classList.add('hidden');
+        window.toggleNotifications=()=>{nbox.classList.toggle('hidden');if(!nbox.classList.contains('hidden')){document.getElementById('tab-groups')?.classList.remove('has-dot');document.getElementById('tab-courses')?.classList.remove('has-dot');document.getElementById('btn-requests')?.classList.remove('has-dot');}}
         window.toggleMode=()=>{document.documentElement.classList.toggle('light');document.documentElement.classList.toggle('dark');localStorage.setItem('oc_theme',document.documentElement.classList.contains('light'))};
         window.closeVault = () => { document.getElementById('media-vault').classList.add('hidden'); currentVideoContext = null; if(videoPlayer) videoPlayer.destroy(); };
         function showScreen(id) { ['auth-screen', 'verify-screen', 'onboarding-screen', 'dashboard'].forEach(s => document.getElementById(s).classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); }
